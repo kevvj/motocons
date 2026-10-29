@@ -2,8 +2,11 @@
 -- Base de datos única de MOTOCONS.
 -- Antes de agregar algo, LEE TODO ESTE ARCHIVO: la tabla que necesitas
 -- puede existir ya. Cada grupo agrega sus tablas al final, en su sección.
+-- Al ejecutarlo BORRA tu base local y la crea de nuevo: tus datos de
+-- prueba deben estar aquí como INSERT, no solo en tu MySQL.
 -- =============================================================
-CREATE DATABASE IF NOT EXISTS motocons
+DROP DATABASE IF EXISTS motocons;
+CREATE DATABASE motocons
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 

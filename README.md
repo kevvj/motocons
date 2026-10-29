@@ -3,12 +3,19 @@
 Proyecto del diplomado. Cada grupo hace su funcionalidad (módulo) dentro de este mismo proyecto.
 PHP puro con Modelo–Vista–Controlador y una sola base de datos MySQL.
 
-¿Usas un agente de IA (Claude Code, Codex, Cursor, Copilot)? Las reglas para él están en `AGENTS.md` y la mayoría las lee solo.
+## Si usas IA (Claude, ChatGPT, Codex, Cursor, Copilot, Gemini...)
+
+Antes de pedirle código, dale estos dos archivos como contexto:
+
+- **`AGENTS.md`**: las reglas del proyecto (qué puede tocar, cómo armar el módulo, base de datos, seguridad, git).
+- **`DESIGN.md`**: el diseño visual (colores, fuente, botones, tarjetas, qué no hacer). Así tu página se ve igual que las demás.
+
+Claude Code, Codex, Cursor y Copilot leen `AGENTS.md` solos si abres la carpeta del proyecto. En un chat (ChatGPT, Gemini, Claude web), adjunta los dos archivos o pega su contenido al inicio y dile: *"Sigue estas reglas y este diseño en todo lo que hagas"*.
 
 ## 1. Correrlo en tu PC
 
 1. Copia `config/config.ejemplo.php` como `config/config.php` y pon tu usuario y clave de MySQL.
-2. Ejecuta `database/motocons.sql` en MySQL (phpMyAdmin o Workbench).
+2. Ejecuta `database/motocons.sql` en MySQL (phpMyAdmin o Workbench). Vuelve a ejecutarlo cada vez que traigas cambios de `dev`: borra tu base local y la crea de nuevo con las tablas de todos.
 3. En la carpeta del proyecto, ejecuta:
    ```sh
    php -S localhost:8000 -t public
@@ -25,9 +32,13 @@ git checkout -b grupo-<tu_modulo>      # ej.: grupo-garantia
 
 ## 3. Crear tu módulo
 
-Copia la carpeta `modulos/_plantilla/` y llámala como tu módulo, en minúsculas. Por ejemplo, `modulos/garantia/`.
+Ejemplo con un módulo llamado `garantia`:
 
-Para que tu módulo salga en la página de inicio, edita `modulos/garantia/modulo.php` con el nombre, una descripción y la ruta. Aparece solo como una tarjeta; no toques el inicio.
+1. **Copia** la carpeta `modulos/_plantilla/` como `modulos/garantia/` (minúsculas; si son dos palabras, con `_`: `ventas_tienda`).
+2. **Renombra el controlador:** `controladores/PlantillaControlador.php` → `GarantiaControlador.php`, y dentro cambia `class PlantillaControlador` por `class GarantiaControlador`. Para `ventas_tienda` sería `VentasTiendaControlador`.
+3. **Renombra o borra el modelo de ejemplo:** `modelos/PlantillaEjemploModelo.php`. Tus modelos se llaman `Garantia<Algo>Modelo.php`, con la clase igual al archivo.
+4. **Edita `modulo.php`:** nombre, descripción y `'ruta' => 'garantia/index'`. Con eso tu módulo sale solo como tarjeta en la página de inicio; no toques el inicio.
+5. Abre `index.php?r=garantia/index`.
 
 | Quieres... | Haces esto |
 |---|---|
@@ -136,6 +147,7 @@ Luego, en GitHub: **Compare & pull request**, hacia **`dev`**, nunca hacia `main
 - **Léelo completo antes de crear una tabla.** Si ya existe (por ejemplo `cliente`), úsala; no la vuelvas a crear.
 - Pon tus tablas al final, en una sección con el nombre de tu módulo.
 - ¿Necesitas una columna en una tabla de otro grupo? Usa `ALTER TABLE` en tu sección y avísale a ese grupo.
+- **Datos de prueba:** ponlos como `INSERT` en tu sección, debajo de tus tablas. Lo que agregues solo en tu MySQL se borra la próxima vez que ejecutes el archivo, y los demás no lo tendrán.
 
 ## 6. Reglas
 
