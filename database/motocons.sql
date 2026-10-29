@@ -144,3 +144,15 @@ INSERT INTO mantenimiento (vehiculo_id, fecha, tipo, descripcion, costo_repuesto
     (2, DATE_SUB(CURDATE(), INTERVAL 3 MONTH), 'garantia', 'Cambio de pastillas de freno', 80000, 0),
     (2, DATE_SUB(CURDATE(), INTERVAL 1 MONTH), 'pagado', 'Revisión general', 0, 60000),
     (3, DATE_SUB(CURDATE(), INTERVAL 11 MONTH), 'garantia', 'Primera revisión', 40000, 0);
+
+-- =====================  MÓDULO: mantenimiento  =====================
+-- Grupo: Leocarlos Ospina Causil, Caleb Seña Melo, Jhonatan David Cantero Hernández,
+--        Miguel Andrés De Aguas Martínez, Joel David Toscano Cafiel, Adrian Ricardo Villazon Ascanio
+-- Fecha: 2026-10-29
+-- Usa tablas de otros módulos: usuario (login), cliente, moto, venta, vehiculo, mantenimiento (garantia).
+-- No crea tablas nuevas: reutiliza las tablas comunes del taller.
+-- Agrega usuario mecanico para hacer pruebas.
+
+-- Usuario de prueba del taller: mecanico@motocons.com / mecanico123
+INSERT INTO usuario (nombre, correo, clave, rol) VALUES
+    ('Mecánico de prueba', 'mecanico@motocons.com', '$2y$12$GHinqXOnAWaIkiYlSRZXK.iOesUitgC5KY/2kM2DBnaexd.a21QYW', 'mecanico');
