@@ -13,4 +13,7 @@ if (!file_exists($config)) {
 }
 require $config;
 
+// La sesión la usa el login (modulos/login) para saber quién entró.
+session_start();
+
 Router::despachar($_GET['r'] ?? 'inicio/index');

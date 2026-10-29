@@ -11,7 +11,15 @@
     <?php endif; ?>
 </head>
 <body>
-<header>
-    <a href="index.php">MOTOCONS</a>
+<header class="barra">
+    <a class="marca" href="index.php">MOTO<span>CONS</span></a>
+    <nav>
+        <?php if (isset($_SESSION['usuario'])): ?>
+            <span class="barra-usuario"><?= htmlspecialchars($_SESSION['usuario']['nombre']) ?></span>
+            <a class="btn btn-secundario btn-chico" href="index.php?r=login/salir">Salir</a>
+        <?php else: ?>
+            <a class="btn btn-chico" href="index.php?r=login/index">Iniciar sesión</a>
+        <?php endif; ?>
+    </nav>
 </header>
-<main>
+<main class="contenedor">
