@@ -3,6 +3,8 @@
 Proyecto del diplomado. Cada grupo hace su funcionalidad (módulo) dentro de este mismo proyecto.
 PHP puro con Modelo–Vista–Controlador y una sola base de datos MySQL.
 
+¿Usas un agente de IA (Claude Code, Codex, Cursor, Copilot)? Las reglas para él están en `AGENTS.md` y la mayoría las lee solo.
+
 ## 1. Correrlo en tu PC
 
 1. Copia `config/config.ejemplo.php` como `config/config.php` y pon tu usuario y clave de MySQL.
@@ -24,6 +26,8 @@ git checkout -b grupo-<tu_modulo>      # ej.: grupo-garantia
 ## 3. Crear tu módulo
 
 Copia la carpeta `modulos/_plantilla/` y llámala como tu módulo, en minúsculas. Por ejemplo, `modulos/garantia/`.
+
+Para que tu módulo salga en la página de inicio, edita `modulos/garantia/modulo.php` con el nombre, una descripción y la ruta. Aparece solo como una tarjeta; no toques el inicio.
 
 | Quieres... | Haces esto |
 |---|---|
