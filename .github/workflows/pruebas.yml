@@ -55,3 +55,10 @@ jobs:
           codigo=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:8000/index.php')
           echo "Respuesta: $codigo"
           [ "$codigo" = "200" ]
+
+          # El login de prueba debe funcionar: entra y redirige al inicio
+          curl -s -c cookies.txt -o /dev/null 'http://localhost:8000/index.php?r=login/index'
+          destino=$(curl -s -b cookies.txt -o /dev/null -w '%{redirect_url}' \
+            -d 'correo=admin@motocons.com&clave=admin123' 'http://localhost:8000/index.php?r=login/entrar')
+          echo "Login redirige a: $destino"
+          [[ "$destino" == *"r=inicio/index"* ]]
