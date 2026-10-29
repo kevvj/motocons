@@ -2,7 +2,8 @@
 // Base de los controladores. Cada módulo extiende esta clase.
 abstract class Controlador
 {
-    // Carpeta del módulo, la pone el Router.
+    // Nombre y carpeta del módulo, los pone el Router.
+    public string $modulo = '';
     public string $carpetaModulo = '';
 
     // Muestra una vista del módulo dentro del layout común.
