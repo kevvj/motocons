@@ -11,7 +11,7 @@ PHP puro con Modelo–Vista–Controlador y una sola base de datos MySQL.
    ```sh
    php -S localhost:8000 -t public
    ```
-4. Abre http://localhost:8000
+4. Abre http://localhost:8000. Usuario de prueba: `admin@motocons.com` / `admin123`.
 
 ## 2. Crear tu rama
 
@@ -30,7 +30,8 @@ Copia la carpeta `modulos/_plantilla/` y llámala como tu módulo, en minúscula
 | Una página | Crea el archivo en `modulos/garantia/vistas/`. Ej.: `consultar.php`, con HTML. |
 | Que la página se vea | En `controladores/GarantiaControlador.php` agrega un método que la muestre (ver abajo). Entra a `index.php?r=garantia/consultar`. |
 | Leer o guardar en la base de datos | Crea un modelo en `modelos/`. Ej.: `GarantiaVehiculoModelo.php` (ver abajo). |
-| Estilos | Crea `public/assets/css/garantia.css`. Se carga solo en las páginas de tu módulo. |
+| Que solo entren usuarios con sesión | Pon `$this->requiereLogin();` al inicio del método (ver "Login"). |
+| Estilos | Primero usa las clases comunes (ver "Estilos comunes"). Lo propio va en `public/assets/css/garantia.css`, que se carga solo en tu módulo. |
 | JavaScript | Crea `public/assets/js/garantia.js`. También se carga solo. |
 | Imágenes | Ponlas en `public/assets/img/garantia/` y úsalas con `<img src="assets/img/garantia/foto.png">`. |
 | Tablas nuevas | Agrégalas en `database/motocons.sql` (ver sección 5). |
@@ -71,6 +72,47 @@ Las variables que mandas desde el controlador llegan con su nombre.
 <?php foreach ($vehiculo as $v): ?>
     <p><?= htmlspecialchars($v['placa']) ?></p>
 <?php endforeach; ?>
+```
+
+### Estilos comunes
+
+Están en `public/assets/css/estilos.css` y se cargan en todas las páginas. Úsalos para que todo el proyecto se vea igual. El login (`modulos/login/vistas/index.php`) es el ejemplo a seguir.
+
+| Clase | Para qué |
+|---|---|
+| `tarjeta` | Caja blanca con borde y sombra |
+| `btn`, `btn-secundario`, `btn-peligro`, `btn-chico`, `btn-bloque` | Botones, en `<button>` o `<a>` |
+| `campo` | Envuelve un `<label>` y un `<input>`, `<select>` o `<textarea>` |
+| `alerta alerta-error`, `alerta-exito`, `alerta-aviso` | Mensajes |
+| `tabla` | Tablas |
+| `rejilla` | Pone tarjetas en columnas que se adaptan al celular |
+
+Colores: usa las variables, no códigos sueltos. Por ejemplo `color: var(--color-primario);`. La lista está al inicio de `estilos.css`.
+
+```php
+<div class="tarjeta">
+    <h2>Buscar garantía</h2>
+    <form method="post" action="index.php?r=garantia/consultar">
+        <div class="campo">
+            <label for="placa">Placa</label>
+            <input id="placa" name="placa" required>
+        </div>
+        <button class="btn">Buscar</button>
+    </form>
+</div>
+```
+
+### Login
+
+El login es común; no hagas otro. La tabla `usuario` ya está en `motocons.sql`.
+
+```php
+public function consultar(): void
+{
+    $this->requiereLogin();                        // si no hay sesión, lo manda al login
+    // $this->requiereLogin(['admin', 'vendedor']); // solo esos roles
+    $usuario = $this->usuario();                   // ['id', 'nombre', 'correo', 'rol']
+}
 ```
 
 ## 4. Subir tu trabajo (Pull Request)

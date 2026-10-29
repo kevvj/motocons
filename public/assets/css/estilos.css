@@ -1,5 +1,123 @@
-/* Estilos comunes. Los de cada módulo van en assets/css/<modulo>.css */
-body { font-family: system-ui, sans-serif; margin: 0; color: #222; }
-header, footer { padding: 1rem 2rem; background: #1f2937; color: #fff; }
-header a { color: #fff; text-decoration: none; font-weight: bold; }
-main { padding: 2rem; max-width: 960px; margin: 0 auto; }
+/* =============================================================
+   Estilos comunes de MOTOCONS. Úsalos en tu módulo antes de crear los tuyos.
+   Los colores y medidas están en variables: usa var(--color-primario), etc.
+   Lo propio de tu módulo va en assets/css/<modulo>.css
+   ============================================================= */
+:root {
+    --color-primario: #e85d04;
+    --color-primario-oscuro: #c44d00;
+    --color-oscuro: #1b1f24;
+    --color-texto: #22262b;
+    --color-texto-suave: #5f6670;
+    --color-borde: #d9dde2;
+    --color-fondo: #f4f5f7;
+    --color-blanco: #ffffff;
+    --color-exito: #1f8a4c;
+    --color-error: #c62828;
+    --color-aviso: #b26a00;
+
+    --radio: 8px;
+    --sombra: 0 2px 10px rgba(0, 0, 0, 0.08);
+    --fuente: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--fuente);
+    color: var(--color-texto);
+    background: var(--color-fondo);
+    line-height: 1.5;
+}
+
+h1, h2, h3 { margin: 0 0 0.75rem; line-height: 1.2; }
+a { color: var(--color-primario); }
+
+/* ---------- Barra superior y pie ---------- */
+.barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--color-oscuro);
+    color: var(--color-blanco);
+}
+.barra nav { display: flex; align-items: center; gap: 0.75rem; }
+.marca { color: var(--color-blanco); font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: 0.5px; }
+.marca span { color: var(--color-primario); }
+.barra-usuario { color: #c9ced6; font-size: 0.9rem; }
+
+.pie { padding: 1rem; text-align: center; font-size: 0.85rem; color: var(--color-texto-suave); }
+
+/* ---------- Contenedor ---------- */
+.contenedor { flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+
+/* ---------- Tarjeta ---------- */
+.tarjeta {
+    background: var(--color-blanco);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+    padding: 1.5rem;
+}
+
+/* ---------- Botones: <button class="btn"> o <a class="btn"> ---------- */
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--color-primario);
+    border-radius: var(--radio);
+    background: var(--color-primario);
+    color: var(--color-blanco);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+.btn:hover { background: var(--color-primario-oscuro); border-color: var(--color-primario-oscuro); }
+.btn-secundario { background: transparent; color: inherit; border-color: var(--color-borde); }
+.btn-secundario:hover { background: rgba(0, 0, 0, 0.06); border-color: var(--color-borde); }
+.btn-peligro { background: var(--color-error); border-color: var(--color-error); }
+.btn-chico { padding: 0.35rem 0.8rem; font-size: 0.9rem; }
+.btn-bloque { display: block; width: 100%; text-align: center; }
+
+/* ---------- Formularios: <div class="campo"><label>..</label><input></div> ---------- */
+.campo { margin-bottom: 1rem; }
+.campo label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.9rem; }
+.campo input, .campo select, .campo textarea {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    font: inherit;
+    background: var(--color-blanco);
+}
+.campo input:focus, .campo select:focus, .campo textarea:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2);
+}
+
+/* ---------- Alertas: <div class="alerta alerta-error"> ---------- */
+.alerta { padding: 0.75rem 1rem; border-radius: var(--radio); margin-bottom: 1rem; border: 1px solid; }
+.alerta-error { color: var(--color-error); background: #fdecea; border-color: #f5c2c0; }
+.alerta-exito { color: var(--color-exito); background: #e8f5ee; border-color: #b9e0c9; }
+.alerta-aviso { color: var(--color-aviso); background: #fff4e0; border-color: #f3d9a4; }
+
+/* ---------- Tablas: <table class="tabla"> ---------- */
+.tabla { width: 100%; border-collapse: collapse; background: var(--color-blanco); }
+.tabla th, .tabla td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--color-borde); text-align: left; }
+.tabla th { background: var(--color-fondo); font-size: 0.85rem; text-transform: uppercase; color: var(--color-texto-suave); }
+
+/* ---------- Rejilla: <div class="rejilla"> con tarjetas dentro ---------- */
+.rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+
+@media (max-width: 600px) {
+    .barra { padding: 0.75rem 1rem; }
+    .barra-usuario { display: none; }
+}

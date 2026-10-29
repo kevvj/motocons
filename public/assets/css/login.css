@@ -1,0 +1,4 @@
+/* Solo para la página de login. Lo común está en estilos.css */
+.login { display: flex; justify-content: center; align-items: center; min-height: 60vh; }
+.login-tarjeta { width: 100%; max-width: 400px; border-top: 4px solid var(--color-primario); }
+.login-subtitulo { margin: 0 0 1.25rem; color: var(--color-texto-suave); }
