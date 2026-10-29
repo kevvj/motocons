@@ -15,6 +15,7 @@ class GarantiaControlador extends Controlador
         $datos = [
             'esCliente' => $this->esCliente(),
             'misMotos' => [],
+            'listaMotos' => $this->esCliente() ? [] : $modelo->listaMotos(),
             'criterio' => $criterio,
             'valor' => $valor,
             'resultado' => null,
