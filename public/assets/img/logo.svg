@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="MOTOCONS">
+  <rect width="48" height="48" rx="11" fill="#ff3300"/>
+  <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="32" r="6.5"/>
+    <circle cx="36" cy="32" r="6.5"/>
+    <path d="M12 32 L21 29"/>
+    <path d="M36 32 L31.5 17.5 H35.5"/>
+  </g>
+  <path fill="#fff" d="M9 23.5 Q9 21.5 11 21.5 H17 L20 19 Q22 17.5 25 17.5 H30 Q32 17.5 32 19.5 L31 23 Q30.5 25 28.5 25 H11 Q9 25 9 23.5 Z"/>
+  <rect x="18" y="25" width="10" height="7" rx="2" fill="#fff"/>
+  <circle cx="12" cy="32" r="1.8" fill="#fff"/>
+  <circle cx="36" cy="32" r="1.8" fill="#fff"/>
+</svg>
