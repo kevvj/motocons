@@ -1,0 +1,57 @@
+# Sube la página al hosting (InfinityFree, https://motocons.gt.tc) cada vez que se actualiza main.
+# Solo sube el código. La base de datos se importa a mano en phpMyAdmin cuando cambia motocons.sql.
+# Necesita el secreto HOSTING_CLAVE (Settings > Secrets and variables > Actions).
+name: Desplegar
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # para correrlo a mano desde la pestaña Actions
+
+concurrency: desplegar
+
+jobs:
+  desplegar:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Armar la carpeta del sitio
+        env:
+          HOSTING_CLAVE: ${{ secrets.HOSTING_CLAVE }}
+        run: |
+          mkdir -p sitio/config
+          cp -r core modulos public vistas sitio/
+
+          # config.php se arma aquí con el secreto; nunca está en el repo
+          cat > sitio/config/config.php <<EOF
+          <?php
+          define('DB_HOST', 'sql103.infinityfree.com');
+          define('DB_PUERTO', '3306');
+          define('DB_NOMBRE', 'if0_43301975_motocons');
+          define('DB_USUARIO', 'if0_43301975');
+          define('DB_CLAVE', '${HOSTING_CLAVE}');
+
+          define('URL_BASE', 'https://motocons.gt.tc');
+          EOF
+
+          # Siempre por https y todo entra por public/ (nadie abre core/ ni config/)
+          cat > sitio/.htaccess <<'EOF'
+          RewriteEngine On
+          RewriteCond %{HTTPS} off
+          RewriteCond %{HTTP:X-Forwarded-Proto} !https
+          RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+          RewriteCond %{REQUEST_URI} !^/public/
+          RewriteRule ^(.*)$ public/$1 [L]
+          EOF
+
+      - name: Subir por FTP (solo lo que cambió)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftpupload.net
+          username: if0_43301975
+          password: ${{ secrets.HOSTING_CLAVE }}
+          local-dir: ./sitio/
+          server-dir: /htdocs/
