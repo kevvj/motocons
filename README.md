@@ -3,10 +3,19 @@
 Proyecto del diplomado. Cada grupo hace su funcionalidad (módulo) dentro de este mismo proyecto.
 PHP puro con Modelo–Vista–Controlador y una sola base de datos MySQL.
 
+## Si usas IA (Claude, ChatGPT, Codex, Cursor, Copilot, Gemini...)
+
+Antes de pedirle código, dale estos dos archivos como contexto:
+
+- **`AGENTS.md`**: las reglas del proyecto (qué puede tocar, cómo armar el módulo, base de datos, seguridad, git).
+- **`DESIGN.md`**: el diseño visual (colores, fuente, botones, tarjetas, qué no hacer). Así tu página se ve igual que las demás.
+
+Claude Code, Codex, Cursor y Copilot leen `AGENTS.md` solos si abres la carpeta del proyecto. En un chat (ChatGPT, Gemini, Claude web), adjunta los dos archivos o pega su contenido al inicio y dile: *"Sigue estas reglas y este diseño en todo lo que hagas"*.
+
 ## 1. Correrlo en tu PC
 
 1. Copia `config/config.ejemplo.php` como `config/config.php` y pon tu usuario y clave de MySQL.
-2. Ejecuta `database/motocons.sql` en MySQL (phpMyAdmin o Workbench).
+2. Ejecuta `database/motocons.sql` en MySQL (phpMyAdmin o Workbench). Vuelve a ejecutarlo cada vez que traigas cambios de `dev`: borra tu base local y la crea de nuevo con las tablas de todos.
 3. En la carpeta del proyecto, ejecuta:
    ```sh
    php -S localhost:8000 -t public
@@ -23,7 +32,13 @@ git checkout -b grupo-<tu_modulo>      # ej.: grupo-garantia
 
 ## 3. Crear tu módulo
 
-Copia la carpeta `modulos/_plantilla/` y llámala como tu módulo, en minúsculas. Por ejemplo, `modulos/garantia/`.
+Ejemplo con un módulo llamado `garantia`:
+
+1. **Copia** la carpeta `modulos/_plantilla/` como `modulos/garantia/` (minúsculas; si son dos palabras, con `_`: `ventas_tienda`).
+2. **Renombra el controlador:** `controladores/PlantillaControlador.php` → `GarantiaControlador.php`, y dentro cambia `class PlantillaControlador` por `class GarantiaControlador`. Para `ventas_tienda` sería `VentasTiendaControlador`.
+3. **Renombra o borra el modelo de ejemplo:** `modelos/PlantillaEjemploModelo.php`. Tus modelos se llaman `Garantia<Algo>Modelo.php`, con la clase igual al archivo.
+4. **Edita `modulo.php`:** nombre, descripción y `'ruta' => 'garantia/index'`. Con eso tu módulo sale solo como tarjeta en la página de inicio; no toques el inicio.
+5. Abre `index.php?r=garantia/index`.
 
 | Quieres... | Haces esto |
 |---|---|
@@ -132,6 +147,7 @@ Luego, en GitHub: **Compare & pull request**, hacia **`dev`**, nunca hacia `main
 - **Léelo completo antes de crear una tabla.** Si ya existe (por ejemplo `cliente`), úsala; no la vuelvas a crear.
 - Pon tus tablas al final, en una sección con el nombre de tu módulo.
 - ¿Necesitas una columna en una tabla de otro grupo? Usa `ALTER TABLE` en tu sección y avísale a ese grupo.
+- **Datos de prueba:** ponlos como `INSERT` en tu sección, debajo de tus tablas. Lo que agregues solo en tu MySQL se borra la próxima vez que ejecutes el archivo, y los demás no lo tendrán.
 
 ## 6. Reglas
 
@@ -142,7 +158,14 @@ Luego, en GitHub: **Compare & pull request**, hacia **`dev`**, nunca hacia `main
 
 ## 7. ¿Qué pasa con mi PR?
 
-Primero corren las **pruebas automáticas**: sintaxis PHP, que `motocons.sql` se ejecute sin errores, que no subas contraseñas y que la página cargue. Si sale una X roja, entra a "Details", mira qué falló, corrige y haz push. Sin el check verde no se puede fusionar.
+Primero corren las **pruebas automáticas**. Revisan que:
+- la rama se llame `grupo-<modulo>` y que el PR solo toque tu módulo, tus assets y `motocons.sql`;
+- los PR a `main` vengan solo de `dev`;
+- tus clases sigan los nombres (clase = archivo, prefijo del módulo) y exista `modulo.php`;
+- el PHP no tenga errores de sintaxis, `motocons.sql` se ejecute y no subas contraseñas;
+- el inicio, el login y la página de tu módulo carguen sin errores ni warnings de PHP.
+
+Si sale una X roja, entra a "Details", mira qué falló, corrige y haz push. Sin el check verde no se puede fusionar.
 
 - **Aprobado:** entra a `dev`. Sigue trabajando en tu misma rama.
 - **Cambios solicitados:** lee los comentarios en el PR, corrige en tu misma rama y haz push. El PR se actualiza solo; no abras otro.
