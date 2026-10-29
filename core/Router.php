@@ -19,6 +19,7 @@ class Router
         }
         require_once $archivo;
         $controlador = new $clase();
+        $controlador->modulo = $modulo;
         $controlador->carpetaModulo = $carpeta;
 
         if (!is_callable([$controlador, $accion])) {
