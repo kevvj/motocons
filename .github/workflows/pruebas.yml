@@ -1,0 +1,57 @@
+# Pruebas automáticas en cada PR hacia dev o main. Si algo falla, no se puede fusionar.
+name: Pruebas
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql
+
+      - name: No se suben contraseñas
+        run: |
+          prohibidos=$(git ls-files | grep -E '(^|/)(config\.php|\.env)$' | grep -v 'config\.ejemplo\.php' || true)
+          if [ -n "$prohibidos" ]; then
+            echo "::error::Estos archivos no se pueden subir: $prohibidos"
+            exit 1
+          fi
+
+      - name: Sintaxis PHP
+        run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
+
+      - name: Base de datos (database/motocons.sql)
+        run: mysql -h 127.0.0.1 -uroot -proot < database/motocons.sql
+
+      - name: La página de inicio carga
+        run: |
+          sed -e "s/'DB_HOST', 'localhost'/'DB_HOST', '127.0.0.1'/" -e "s/'DB_CLAVE', ''/'DB_CLAVE', 'root'/" \
+            config/config.ejemplo.php > config/config.php
+          php -S localhost:8000 -t public > /dev/null 2>&1 &
+          sleep 2
+          codigo=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:8000/index.php')
+          echo "Respuesta: $codigo"
+          [ "$codigo" = "200" ]

@@ -100,6 +100,8 @@ Luego, en GitHub: **Compare & pull request**, hacia **`dev`**, nunca hacia `main
 
 ## 7. ¿Qué pasa con mi PR?
 
+Primero corren las **pruebas automáticas**: sintaxis PHP, que `motocons.sql` se ejecute sin errores, que no subas contraseñas y que la página cargue. Si sale una X roja, entra a "Details", mira qué falló, corrige y haz push. Sin el check verde no se puede fusionar.
+
 - **Aprobado:** entra a `dev`. Sigue trabajando en tu misma rama.
 - **Cambios solicitados:** lee los comentarios en el PR, corrige en tu misma rama y haz push. El PR se actualiza solo; no abras otro.
 - **Cerrado:** algo grave, por ejemplo tocar carpetas de otros, apuntar a `main`, subir contraseñas o romper el proyecto. El motivo queda escrito en el PR. Corrige y abre un PR nuevo.
