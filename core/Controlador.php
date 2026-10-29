@@ -39,4 +39,25 @@ abstract class Controlador
         header('Location: ' . URL_BASE . '/index.php?r=' . $ruta);
         exit;
     }
+
+    // Usuario que inició sesión (id, nombre, correo, rol) o null.
+    protected function usuario(): ?array
+    {
+        return $_SESSION['usuario'] ?? null;
+    }
+
+    // Pon esto al inicio de una acción para que solo entren usuarios con sesión.
+    // Con roles: requiereLogin(['admin', 'vendedor']).
+    protected function requiereLogin(array $roles = []): void
+    {
+        $usuario = $this->usuario();
+        if ($usuario === null) {
+            $_SESSION['volver_a'] = $_GET['r'] ?? 'inicio/index';
+            $this->redirigir('login/index');
+        }
+        if ($roles && !in_array($usuario['rol'], $roles, true)) {
+            http_response_code(403);
+            exit('No tienes permiso para entrar aquí.');
+        }
+    }
 }
