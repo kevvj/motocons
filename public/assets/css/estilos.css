@@ -1,0 +1,5 @@
+/* Estilos comunes. Los de cada módulo van en assets/css/<modulo>.css */
+body { font-family: system-ui, sans-serif; margin: 0; color: #222; }
+header, footer { padding: 1rem 2rem; background: #1f2937; color: #fff; }
+header a { color: #fff; text-decoration: none; font-weight: bold; }
+main { padding: 2rem; max-width: 960px; margin: 0 auto; }

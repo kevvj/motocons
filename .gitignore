@@ -1,0 +1,14 @@
+# Datos locales (contraseñas): nunca se suben
+config/config.php
+.env
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependencias y temporales
+vendor/
+node_modules/
+*.log
