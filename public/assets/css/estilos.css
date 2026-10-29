@@ -1,61 +1,71 @@
 /* =============================================================
-   Estilos comunes de MOTOCONS. Úsalos en tu módulo antes de crear los tuyos.
-   Los colores y medidas están en variables: usa var(--color-primario), etc.
-   Lo propio de tu módulo va en assets/css/<modulo>.css
+   Estilos comunes de MOTOCONS (basados en DESIGN.md: Swiss Modern).
+   Blanco como color principal, negro suave para el texto y rojo como acento.
+   Úsalos en tu módulo antes de crear los tuyos. Colores y medidas en variables:
+   usa var(--color-primario), etc. Lo propio de tu módulo va en assets/css/<modulo>.css
    ============================================================= */
 :root {
-    --color-primario: #e85d04;
-    --color-primario-oscuro: #c44d00;
-    --color-oscuro: #1b1f24;
-    --color-texto: #22262b;
-    --color-texto-suave: #5f6670;
-    --color-borde: #d9dde2;
-    --color-fondo: #f4f5f7;
+    --color-primario: #ff3300;
+    --color-primario-oscuro: #d92b00;
+    --color-oscuro: #141414;
+    --color-texto: #1f1f1f;
+    --color-texto-suave: #5c5c5c;
+    --color-borde: #e2e2e2;
+    --color-fondo: #ffffff;
+    --color-fondo-suave: #f5f5f5;
     --color-blanco: #ffffff;
     --color-exito: #1f8a4c;
-    --color-error: #c62828;
-    --color-aviso: #b26a00;
+    --color-error: #d32f2f;
+    --color-aviso: #a86200;
 
-    --radio: 8px;
-    --sombra: 0 2px 10px rgba(0, 0, 0, 0.08);
-    --fuente: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --radio: 6px;
+    --radio-boton: 9999px;
+    --sombra: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --transicion: 200ms ease-out;
+    --fuente: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
     margin: 0;
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     font-family: var(--fuente);
     color: var(--color-texto);
     background: var(--color-fondo);
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
-h1, h2, h3 { margin: 0 0 0.75rem; line-height: 1.2; }
+h1, h2, h3 { margin: 0 0 0.75rem; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; color: var(--color-oscuro); }
+h1 { font-size: clamp(1.9rem, 4vw, 2.25rem); }
+h2 { font-size: 1.5rem; }
 a { color: var(--color-primario); }
 
 /* ---------- Barra superior y pie ---------- */
 .barra {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
     padding: 0.75rem 1.5rem;
-    background: var(--color-oscuro);
-    color: var(--color-blanco);
+    background: var(--color-fondo);
+    border-bottom: 2px solid var(--color-oscuro);
 }
 .barra nav { display: flex; align-items: center; gap: 0.75rem; }
-.marca { color: var(--color-blanco); font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: 0.5px; }
-.marca span { color: var(--color-primario); }
-.barra-usuario { color: #c9ced6; font-size: 0.9rem; }
+.marca { display: flex; align-items: center; gap: 0.6rem; color: var(--color-oscuro); font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: 0.02em; }
+.marca b { color: var(--color-primario); font-weight: inherit; }
+.marca-logo { width: 36px; height: 36px; }
+.barra-usuario { color: var(--color-texto-suave); font-size: 0.9rem; font-weight: 500; }
 
-.pie { padding: 1rem; text-align: center; font-size: 0.85rem; color: var(--color-texto-suave); }
+.pie { padding: 1.25rem; text-align: center; font-size: 0.85rem; color: var(--color-texto-suave); border-top: 1px solid var(--color-borde); }
 
 /* ---------- Contenedor ---------- */
-.contenedor { flex: 1; width: 100%; max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+.contenedor { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 2.5rem 1.5rem; }
 
 /* ---------- Tarjeta ---------- */
 .tarjeta {
@@ -69,55 +79,61 @@ a { color: var(--color-primario); }
 /* ---------- Botones: <button class="btn"> o <a class="btn"> ---------- */
 .btn {
     display: inline-block;
-    padding: 0.6rem 1.2rem;
-    border: 1px solid var(--color-primario);
-    border-radius: var(--radio);
+    padding: 0.65rem 1.4rem;
+    border: 1.5px solid var(--color-primario);
+    border-radius: var(--radio-boton);
     background: var(--color-primario);
     color: var(--color-blanco);
     font: inherit;
     font-weight: 600;
     text-decoration: none;
     cursor: pointer;
+    transition: background var(--transicion), border-color var(--transicion), box-shadow var(--transicion), transform var(--transicion);
 }
-.btn:hover { background: var(--color-primario-oscuro); border-color: var(--color-primario-oscuro); }
-.btn-secundario { background: transparent; color: inherit; border-color: var(--color-borde); }
-.btn-secundario:hover { background: rgba(0, 0, 0, 0.06); border-color: var(--color-borde); }
+.btn:hover { background: var(--color-primario-oscuro); border-color: var(--color-primario-oscuro); box-shadow: 0 2px 8px rgba(255, 51, 0, 0.25); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--color-primario); outline-offset: 2px; }
+.btn-secundario { background: transparent; color: var(--color-oscuro); border-color: var(--color-borde); }
+.btn-secundario:hover { background: var(--color-fondo-suave); border-color: var(--color-borde); box-shadow: none; }
 .btn-peligro { background: var(--color-error); border-color: var(--color-error); }
-.btn-chico { padding: 0.35rem 0.8rem; font-size: 0.9rem; }
+.btn-chico { padding: 0.35rem 0.9rem; font-size: 0.9rem; }
 .btn-bloque { display: block; width: 100%; text-align: center; }
 
 /* ---------- Formularios: <div class="campo"><label>..</label><input></div> ---------- */
 .campo { margin-bottom: 1rem; }
-.campo label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.9rem; }
+.campo label { display: block; margin-bottom: 0.3rem; font-weight: 500; font-size: 0.875rem; letter-spacing: 0.01em; }
 .campo input, .campo select, .campo textarea {
     width: 100%;
-    padding: 0.6rem 0.75rem;
+    padding: 0.65rem 0.8rem;
     border: 1px solid var(--color-borde);
     border-radius: var(--radio);
     font: inherit;
     background: var(--color-blanco);
+    transition: border-color var(--transicion), box-shadow var(--transicion);
 }
 .campo input:focus, .campo select:focus, .campo textarea:focus {
     outline: none;
     border-color: var(--color-primario);
-    box-shadow: 0 0 0 3px rgba(232, 93, 4, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 51, 0, 0.15);
 }
 
 /* ---------- Alertas: <div class="alerta alerta-error"> ---------- */
-.alerta { padding: 0.75rem 1rem; border-radius: var(--radio); margin-bottom: 1rem; border: 1px solid; }
-.alerta-error { color: var(--color-error); background: #fdecea; border-color: #f5c2c0; }
-.alerta-exito { color: var(--color-exito); background: #e8f5ee; border-color: #b9e0c9; }
-.alerta-aviso { color: var(--color-aviso); background: #fff4e0; border-color: #f3d9a4; }
+.alerta { padding: 0.75rem 1rem; border-radius: var(--radio); margin-bottom: 1rem; border: 1px solid; border-left-width: 4px; }
+.alerta-error { color: var(--color-error); background: #fdeeee; border-color: #f3c4c4; border-left-color: var(--color-error); }
+.alerta-exito { color: var(--color-exito); background: #eaf6ef; border-color: #bfe2cd; border-left-color: var(--color-exito); }
+.alerta-aviso { color: var(--color-aviso); background: #fff6e6; border-color: #f1dcae; border-left-color: var(--color-aviso); }
 
 /* ---------- Tablas: <table class="tabla"> ---------- */
 .tabla { width: 100%; border-collapse: collapse; background: var(--color-blanco); }
-.tabla th, .tabla td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--color-borde); text-align: left; }
-.tabla th { background: var(--color-fondo); font-size: 0.85rem; text-transform: uppercase; color: var(--color-texto-suave); }
+.tabla th, .tabla td { padding: 0.7rem 0.75rem; border-bottom: 1px solid var(--color-borde); text-align: left; }
+.tabla th { border-bottom: 2px solid var(--color-oscuro); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-texto-suave); }
+.tabla tbody tr:hover { background: var(--color-fondo-suave); }
 
 /* ---------- Rejilla: <div class="rejilla"> con tarjetas dentro ---------- */
-.rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem; }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .barra { padding: 0.75rem 1rem; }
     .barra-usuario { display: none; }
+    .contenedor { padding: 1.75rem 1rem; }
 }

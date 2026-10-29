@@ -26,11 +26,21 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historial completo, para ver qué archivos cambia el PR
 
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           extensions: pdo_mysql
+
+      - name: El PR solo toca lo de su grupo
+        if: github.event_name == 'pull_request'
+        env:
+          DESTINO: ${{ github.base_ref }}
+          ORIGEN: ${{ github.head_ref }}
+          AUTOR: ${{ github.event.pull_request.user.login }}
+        run: bash .github/pruebas/carpetas_pr.sh "$DESTINO" "$ORIGEN" "$AUTOR"
 
       - name: No se suben contraseñas
         run: |
@@ -43,22 +53,17 @@ jobs:
       - name: Sintaxis PHP
         run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
 
+      - name: Convenciones de los módulos
+        run: php .github/pruebas/convenciones.php
+
       - name: Base de datos (database/motocons.sql)
         run: mysql -h 127.0.0.1 -uroot -proot < database/motocons.sql
 
-      - name: La página de inicio carga
+      - name: Las páginas cargan sin errores (inicio, login y cada módulo)
         run: |
           sed -e "s/'DB_HOST', 'localhost'/'DB_HOST', '127.0.0.1'/" -e "s/'DB_CLAVE', ''/'DB_CLAVE', 'root'/" \
             config/config.ejemplo.php > config/config.php
-          php -S localhost:8000 -t public > /dev/null 2>&1 &
+          php -d display_errors=1 -d html_errors=1 -d error_reporting=-1 \
+            -S localhost:8000 -t public > /dev/null 2>&1 &
           sleep 2
-          codigo=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:8000/index.php')
-          echo "Respuesta: $codigo"
-          [ "$codigo" = "200" ]
-
-          # El login de prueba debe funcionar: entra y redirige al inicio
-          curl -s -c cookies.txt -o /dev/null 'http://localhost:8000/index.php?r=login/index'
-          destino=$(curl -s -b cookies.txt -o /dev/null -w '%{redirect_url}' \
-            -d 'correo=admin@motocons.com&clave=admin123' 'http://localhost:8000/index.php?r=login/entrar')
-          echo "Login redirige a: $destino"
-          [[ "$destino" == *"r=inicio/index"* ]]
+          bash .github/pruebas/paginas.sh
