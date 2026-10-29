@@ -47,6 +47,47 @@ jobs:
           RewriteRule ^(.*)$ public/$1 [L]
           EOF
 
+          # SQL para el hosting: sin DROP/CREATE/USE de la base (la crea el panel),
+          # con DROP TABLE antes de cada tabla. Queda fuera de public/: no se puede descargar.
+          mkdir -p sitio/bd
+          sed -e '/^DROP DATABASE/d' -e '/^USE /d' -e '/^CREATE DATABASE/,/;/d' \
+              -e 's/^CREATE TABLE \([a-z_]*\)/DROP TABLE IF EXISTS \1;\nCREATE TABLE \1/' \
+              database/motocons.sql > sitio/bd/motocons.sql
+          sed -i '1i SET FOREIGN_KEY_CHECKS = 0;' sitio/bd/motocons.sql
+          echo 'SET FOREIGN_KEY_CHECKS = 1;' >> sitio/bd/motocons.sql
+
+          # Página que importa ese SQL desde el propio hosting (GitHub no puede entrar a su MySQL).
+          # Se abre a mano: https://motocons.gt.tc/actualizar_bd.php?clave=<sha256 de HOSTING_CLAVE>
+          TOKEN=$(printf '%s' "$HOSTING_CLAVE" | sha256sum | cut -d' ' -f1)
+          cat > sitio/public/actualizar_bd.php <<'EOF'
+          <?php
+          // Borra las tablas y las crea de nuevo con bd/motocons.sql. Solo con la clave.
+          header('Content-Type: text/plain; charset=utf-8');
+          if (!hash_equals('__TOKEN__', (string) ($_GET['clave'] ?? ''))) {
+              http_response_code(403);
+              exit('Clave incorrecta.');
+          }
+          require dirname(__DIR__) . '/config/config.php';
+          $db = new PDO(
+              'mysql:host=' . DB_HOST . ';port=' . DB_PUERTO . ';dbname=' . DB_NOMBRE . ';charset=utf8mb4',
+              DB_USUARIO, DB_CLAVE, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+          );
+          $sql = preg_replace('/^--.*$/m', '', file_get_contents(dirname(__DIR__) . '/bd/motocons.sql'));
+          $n = 0;
+          foreach (preg_split('/;\s*$/m', $sql) as $sentencia) {
+              if (trim($sentencia) === '') continue;
+              try {
+                  $db->exec($sentencia);
+                  $n++;
+              } catch (PDOException $e) {
+                  http_response_code(500);
+                  exit("Error en la sentencia " . ($n + 1) . ": " . $e->getMessage() . "\n\n" . trim($sentencia));
+              }
+          }
+          echo "Base de datos actualizada: $n sentencias.";
+          EOF
+          sed -i "s/__TOKEN__/$TOKEN/" sitio/public/actualizar_bd.php
+
       - name: Subir por FTP (solo lo que cambió)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
