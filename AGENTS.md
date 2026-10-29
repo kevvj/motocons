@@ -46,6 +46,7 @@ El profesor evalúa que no haya funcionalidad repetida entre módulos.
 - ¿Necesitas una columna en una tabla de otro módulo? Usa `ALTER TABLE` en tu sección y avisa al usuario para que lo hable con ese grupo.
 
 ## Estilos
+- El diseño sigue `DESIGN.md` (Swiss Modern): fondo blanco como color principal, texto casi negro, acento rojo `#ff3300`, fuente Archivo, botones redondeados, mucho espacio en blanco. Sin degradados ni sombras fuertes, sin emojis en la interfaz.
 - Usa primero las clases de `public/assets/css/estilos.css`: `tarjeta`, `btn` (`btn-secundario`, `btn-peligro`, `btn-chico`, `btn-bloque`), `campo` (label + input), `alerta alerta-error|alerta-exito|alerta-aviso`, `tabla` y `rejilla`.
 - Colores con variables (`var(--color-primario)`), no códigos sueltos.
 - Sigue el ejemplo de `modulos/login/vistas/index.php`. Lo propio del módulo va en `public/assets/css/<modulo>.css`, que se carga solo.
@@ -62,6 +63,7 @@ El profesor evalúa que no haya funcionalidad repetida entre módulos.
 - Antes de terminar, verifica la sintaxis con `php -l <archivo>` y prueba la página en el navegador.
 
 ## Git
-- Se trabaja en la rama del grupo (`grupo-<modulo>`), que sale de `dev`. Nunca hagas commit en `dev` ni en `main`.
+- Se trabaja en la rama del grupo, que **debe** llamarse `grupo-<modulo>` y sale de `dev`. Nunca hagas commit en `dev` ni en `main`.
+- GitHub Actions rechaza el PR si toca archivos fuera de `modulos/<modulo>/`, sus assets o `database/motocons.sql`, si las clases no siguen los nombres, o si alguna página muestra errores o warnings de PHP. Pruébalo antes con `php -l` y en el navegador.
 - El PR va hacia `dev`, nunca hacia `main`. Antes de abrirlo: `git merge dev` y resolver los conflictos.
 - No hagas commit, push ni PR sin que el usuario lo pida.
