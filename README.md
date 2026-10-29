@@ -146,7 +146,14 @@ Luego, en GitHub: **Compare & pull request**, hacia **`dev`**, nunca hacia `main
 
 ## 7. ¿Qué pasa con mi PR?
 
-Primero corren las **pruebas automáticas**: sintaxis PHP, que `motocons.sql` se ejecute sin errores, que no subas contraseñas y que la página cargue. Si sale una X roja, entra a "Details", mira qué falló, corrige y haz push. Sin el check verde no se puede fusionar.
+Primero corren las **pruebas automáticas**. Revisan que:
+- la rama se llame `grupo-<modulo>` y que el PR solo toque tu módulo, tus assets y `motocons.sql`;
+- los PR a `main` vengan solo de `dev`;
+- tus clases sigan los nombres (clase = archivo, prefijo del módulo) y exista `modulo.php`;
+- el PHP no tenga errores de sintaxis, `motocons.sql` se ejecute y no subas contraseñas;
+- el inicio, el login y la página de tu módulo carguen sin errores ni warnings de PHP.
+
+Si sale una X roja, entra a "Details", mira qué falló, corrige y haz push. Sin el check verde no se puede fusionar.
 
 - **Aprobado:** entra a `dev`. Sigue trabajando en tu misma rama.
 - **Cambios solicitados:** lee los comentarios en el PR, corrige en tu misma rama y haz push. El PR se actualiza solo; no abras otro.
