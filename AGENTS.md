@@ -42,6 +42,7 @@ El profesor evalúa que no haya funcionalidad repetida entre módulos.
   -- Usa tablas de otros módulos: <tabla (módulo)> o "ninguna"
   ```
 - Nombres en minúscula, en singular y con `_` (`detalle_venta`). Llave primaria `id INT AUTO_INCREMENT`. Llaves foráneas `<tabla>_id`.
+- El archivo empieza con `DROP DATABASE IF EXISTS motocons`: siempre crea la base desde cero. Los datos de prueba van como `INSERT` en la sección del módulo.
 - Crea primero las tablas que otras referencian. El archivo debe ejecutarse completo, de arriba abajo, en una base vacía (lo prueba GitHub Actions).
 - ¿Necesitas una columna en una tabla de otro módulo? Usa `ALTER TABLE` en tu sección y avisa al usuario para que lo hable con ese grupo.
 
