@@ -44,6 +44,19 @@ class GarantiaConsultaModelo extends Modelo
         return $this->consultar(self::SELECT . ' WHERE c.usuario_id = ? ORDER BY ve.fecha DESC', [$usuarioId]);
     }
 
+    // Todas las motos vendidas, para la lista desplegable del buscador.
+    public function listaMotos(): array
+    {
+        return $this->consultar(
+            'SELECT v.placa, m.marca, m.modelo, c.nombre AS cliente
+             FROM vehiculo v
+             JOIN moto m ON m.id = v.moto_id
+             JOIN cliente c ON c.id = v.cliente_id
+             WHERE v.placa IS NOT NULL
+             ORDER BY v.placa'
+        );
+    }
+
     public function mantenimientos(int $vehiculoId): array
     {
         return $this->consultar(

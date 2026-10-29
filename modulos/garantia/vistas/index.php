@@ -24,7 +24,26 @@ $criterios = ['placa' => 'Placa', 'chasis' => 'Número de chasis', 'factura' => 
         </div>
     <?php endif; ?>
 <?php else: ?>
-<p class="garantia-subtitulo">Busca la moto con uno de sus datos y mira si la garantía sigue vigente.</p>
+<p class="garantia-subtitulo">Elige la moto de la lista o búscala con uno de sus datos.</p>
+
+<form class="tarjeta garantia-buscador" method="get" action="index.php">
+    <input type="hidden" name="r" value="garantia/index">
+    <input type="hidden" name="criterio" value="placa">
+    <div class="campo garantia-valor">
+        <label for="moto">Elegir de la lista</label>
+        <select id="moto" name="valor" onchange="this.form.submit()" required>
+            <option value="">Selecciona una moto...</option>
+            <?php foreach ($listaMotos as $lm): ?>
+                <option value="<?= htmlspecialchars($lm['placa']) ?>" <?= $lm['placa'] === strtoupper($valor) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($lm['placa'] . ' · ' . $lm['marca'] . ' ' . $lm['modelo'] . ' · ' . $lm['cliente']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <button type="submit" class="btn">Ver</button>
+</form>
+
+<p class="garantia-separador">o escribe el dato</p>
 
 <form class="tarjeta garantia-buscador" method="get" action="index.php">
     <input type="hidden" name="r" value="garantia/index">
@@ -38,7 +57,7 @@ $criterios = ['placa' => 'Placa', 'chasis' => 'Número de chasis', 'factura' => 
     </div>
     <div class="campo garantia-valor">
         <label for="valor">Dato</label>
-        <input id="valor" name="valor" value="<?= htmlspecialchars($valor) ?>" placeholder="Ej.: ABC12D" required autofocus>
+        <input id="valor" name="valor" value="<?= htmlspecialchars($valor) ?>" placeholder="Ej.: ABC12D" required>
     </div>
     <button type="submit" class="btn">Buscar</button>
 </form>
