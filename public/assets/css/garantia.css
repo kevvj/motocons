@@ -64,3 +64,6 @@
 .garantia-moto .garantia-sello { align-self: flex-start; margin-bottom: 0.5rem; }
 .garantia-moto strong { font-size: 1.1rem; color: var(--color-oscuro); }
 .garantia-moto-fin { color: var(--color-texto-suave); font-size: 0.9rem; }
+
+/* Separador entre la lista y la búsqueda escrita */
+.garantia-separador { margin: -0.75rem 0 0.75rem; text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-texto-suave); }
