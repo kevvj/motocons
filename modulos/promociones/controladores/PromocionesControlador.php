@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/../modelos/PromocionesDescuento.php';
-require_once __DIR__ . '/../modelos/PromocionesValidador.php';
+require_once __DIR__ . '/../modelos/PromocionesDescuentoModelo.php';
+require_once __DIR__ . '/../modelos/PromocionesValidadorModelo.php';
 
 // Administración de promociones y catálogo con descuento.
 class PromocionesControlador extends Controlador
@@ -41,7 +41,7 @@ class PromocionesControlador extends Controlador
         $criterio = 'todas';
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $resultado = PromocionesValidador::validar($_POST, $opciones);
+            $resultado = PromocionesValidadorModelo::validar($_POST, $opciones);
             $datos = $resultado['datos'];
             $criterio = $resultado['criterio'];
             $aplicaciones = array_column($resultado['aplicaciones'], 'valor');
@@ -92,7 +92,7 @@ class PromocionesControlador extends Controlador
         $aplicaciones = array_column($promocion['aplica'], 'valor');
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $resultado = PromocionesValidador::validar($_POST, $opciones);
+            $resultado = PromocionesValidadorModelo::validar($_POST, $opciones);
             $datos = $resultado['datos'];
             $datos['id'] = $id;
             $criterio = $resultado['criterio'];
@@ -264,7 +264,7 @@ class PromocionesControlador extends Controlador
         $vigentes = $this->modelo('PromocionesPromocionModelo')->vigentes();
         $this->json([
             'exito' => true,
-            'datos' => array_merge($moto, PromocionesDescuento::precioFinal($moto, $vigentes)),
+            'datos' => array_merge($moto, PromocionesDescuentoModelo::precioFinal($moto, $vigentes)),
         ]);
     }
 
