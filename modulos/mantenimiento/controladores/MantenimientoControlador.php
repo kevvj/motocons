@@ -35,7 +35,8 @@ class MantenimientoControlador extends Controlador
         $modelo = $this->modelo('MantenimientoModelo');
 
         try {
-            $resultado = $modelo->registrar($_POST);
+            $usuario = $this->usuario();
+            $resultado = $modelo->registrar($_POST, (int) ($usuario['id'] ?? 0));
 
             $params = http_build_query([
                 'r'        => 'mantenimiento/index',
@@ -91,7 +92,6 @@ class MantenimientoControlador extends Controlador
             'motos'         => $motos,
             'busqueda'      => $busqueda,
             'seleccionada'  => $seleccionada,
-            'mano_obra'     => MantenimientoModelo::VALOR_MANO_OBRA,
             'tope_garantia' => MantenimientoModelo::TOPE_GARANTIA,
             'mensaje'       => $mensaje,
             'error'         => $error,
