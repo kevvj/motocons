@@ -1,0 +1,177 @@
+.promociones-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+.promociones-cabecera h1 { margin: 0 0 0.35rem; }
+.promociones-subtitulo { margin: 0; color: var(--color-texto-suave); }
+.promociones-acciones-cabecera {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.promociones-stats { margin-bottom: 1.25rem; }
+.promociones-stat-etiqueta {
+    display: block;
+    color: var(--color-texto-suave);
+    font-size: 0.875rem;
+    margin-bottom: 0.35rem;
+}
+.promociones-stat-valor { font-size: 1.5rem; }
+.promociones-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.promociones-pestanas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.promociones-pestana {
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    color: var(--color-texto);
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+.promociones-pestana.es-activa {
+    border-color: var(--color-primario);
+    color: var(--color-primario);
+    font-weight: 600;
+}
+.promociones-buscador {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.promociones-buscador .campo { margin: 0; min-width: 200px; }
+.promociones-secundario {
+    color: var(--color-texto-suave);
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+}
+.promociones-acciones-fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.promociones-acciones-fila form { margin: 0; }
+.promociones-insignia {
+    display: inline-block;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radio);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid var(--color-borde);
+}
+.promociones-vigente {
+    border-color: var(--color-primario);
+    color: var(--color-primario);
+}
+.promociones-programada { color: var(--color-texto); }
+.promociones-vencida,
+.promociones-inactiva { color: var(--color-texto-suave); }
+.tabla-scroll { overflow-x: auto; }
+
+.promociones-formulario h2 {
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
+}
+.promociones-formulario h2:not(:first-child) { margin-top: 1.75rem; }
+.promociones-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+.promociones-radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 0.4rem;
+}
+.promociones-valor {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.promociones-valor input { flex: 1; }
+.promociones-valor span {
+    min-width: 1.25rem;
+    font-weight: 600;
+    color: var(--color-texto-suave);
+}
+.promociones-ayuda {
+    margin: 0.5rem 0 0;
+    color: var(--color-texto-suave);
+    font-size: 0.9rem;
+}
+.promociones-etiqueta-grupo {
+    display: block;
+    margin: 0.75rem 0 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+.promociones-casillas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+}
+.promociones-casillas-vertical { flex-direction: column; }
+.promociones-casilla {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.promociones-error-campo {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--color-primario);
+    font-size: 0.85rem;
+}
+.promociones-barra-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.promociones-filtros-catalogo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+.promociones-filtros-catalogo .campo {
+    margin: 0;
+    min-width: 140px;
+    flex: 1;
+}
+.promociones-catalogo { margin-top: 0.5rem; }
+.promociones-moto.tiene-descuento {
+    border-color: var(--color-primario);
+}
+.promociones-precios {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 0.85rem 0 0.5rem;
+}
+.promociones-precio-antes {
+    text-decoration: line-through;
+    color: var(--color-texto-suave);
+    font-size: 0.95rem;
+}
+.promociones-precio-final {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
