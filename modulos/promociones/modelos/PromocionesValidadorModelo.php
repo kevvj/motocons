@@ -1,6 +1,6 @@
 <?php
 // Validación y normalización de datos de una promoción (formulario o API).
-class PromocionesValidador
+class PromocionesValidadorModelo
 {
     /**
      * @return array{valido: bool, errores: array, datos: array, aplicaciones: array, criterio: string}

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/PromocionesDescuento.php';
+require_once __DIR__ . '/PromocionesDescuentoModelo.php';
 
 // CRUD de promociones y su alcance (promocion_aplica).
 class PromocionesPromocionModelo extends Modelo
@@ -217,7 +217,7 @@ class PromocionesPromocionModelo extends Modelo
             'aplica'         => $this->parsearAplicaciones($fila['aplica_texto'] ?? ''),
         ];
 
-        $promocion['estado_vigencia'] = PromocionesDescuento::estadoVigencia($promocion);
+        $promocion['estado_vigencia'] = PromocionesDescuentoModelo::estadoVigencia($promocion);
 
         return $promocion;
     }

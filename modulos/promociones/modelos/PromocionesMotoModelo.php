@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/PromocionesDescuento.php';
+require_once __DIR__ . '/PromocionesDescuentoModelo.php';
 require_once __DIR__ . '/PromocionesPromocionModelo.php';
 
 // Catálogo de motos (tabla común) con precio y descuento aplicado.
@@ -76,7 +76,7 @@ class PromocionesMotoModelo extends Modelo
         foreach ($this->listar($filtros) as $moto) {
             $catalogo[] = array_merge(
                 $moto,
-                PromocionesDescuento::precioFinal($moto, $promociones, $fecha)
+                PromocionesDescuentoModelo::precioFinal($moto, $promociones, $fecha)
             );
         }
 

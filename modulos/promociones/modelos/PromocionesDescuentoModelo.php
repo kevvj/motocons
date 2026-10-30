@@ -1,6 +1,6 @@
 <?php
 // Reglas de negocio: vigencia, alcance y mejor descuento aplicable.
-class PromocionesDescuento
+class PromocionesDescuentoModelo
 {
     public static function estadoVigencia(array $promocion, ?string $fecha = null): string
     {
