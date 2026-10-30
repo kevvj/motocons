@@ -157,8 +157,18 @@ INSERT INTO mantenimiento (vehiculo_id, fecha, tipo, descripcion, costo_repuesto
 INSERT INTO usuario (nombre, correo, clave, rol) VALUES
     ('Mecánico de prueba', 'mecanico@motocons.com', '$2y$12$GHinqXOnAWaIkiYlSRZXK.iOesUitgC5KY/2kM2DBnaexd.a21QYW', 'mecanico');
 
--- ajustes en el modulo de mantemientos, anexamos atributos en la tabla de mantenimiento y tabla detalle_mantenimiento para el registro de repuestos e insumos usados en cada mantenimiento, ademas de detalle de venta para los recibos
+-- =====================  MÓDULO: mantenimiento  =====================
+-- Grupo: Leocarlos Ospina Causil, Caleb Seña Melo, Jhonatan David Cantero Hernández,
+--        Miguel Andrés De Aguas Martínez, Joel David Toscano Cafiel, Adrian Ricardo Villazon Ascanio
+-- Fecha: 2026-10-29
+-- Usa tablas de otros módulos: motos (inventario), usuarios (login)
+-- Crea tablas nuevas: detalle_mantenimiento, detalle_venta
+-- Modifica tabla: mantenimiento
 
+
+
+-- 1) La tabla mantenimiento ya existe: se le agregan columnas
+--    para enlazar el recibo y guardar el total calculado.
 
 ALTER TABLE mantenimiento
     ADD COLUMN numero_servicio INT NULL AFTER id,
@@ -167,6 +177,7 @@ ALTER TABLE mantenimiento
     ADD CONSTRAINT fk_mantenimiento_usuario
         FOREIGN KEY (usuario_id) REFERENCES usuario (id);
 
+        
 -- actualizacion de los datos de prueba para reflejar los cambios en la tabla mantenimiento
 UPDATE mantenimiento
 SET numero_servicio = 1,
@@ -198,7 +209,7 @@ SET numero_servicio = 1,
     total = costo_repuestos + costo_mano_obra
 WHERE id = 6;
 
-
+-- 2) Detalle de repuestos e insumos usados en cada mantenimiento
 CREATE TABLE detalle_mantenimiento (
     id INT AUTO_INCREMENT PRIMARY KEY,
     mantenimiento_id INT NOT NULL,
@@ -221,23 +232,3 @@ VALUES
     (5, 'insumo', 'Revisión general', 1, 0),
     (6, 'insumo', 'Primera revisión', 1, 40000);
 
-CREATE TABLE detalle_venta (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    venta_id INT NOT NULL,
-    vehiculo_id INT NOT NULL,
-    precio_original DECIMAL(12, 2) NOT NULL,
-    descuento DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    precio_final DECIMAL(12, 2) NOT NULL,
-    UNIQUE KEY uk_detalle_venta_vehiculo (venta_id, vehiculo_id),
-     UNIQUE KEY uk_vehiculo_venta_unica (vehiculo_id),
-    FOREIGN KEY (venta_id) REFERENCES venta (id),
-    FOREIGN KEY (vehiculo_id) REFERENCES vehiculo (id)
-) ENGINE=InnoDB;
-
-INSERT INTO detalle_venta
-    (venta_id, vehiculo_id, precio_original, descuento, precio_final)
-VALUES
-    (1, 1, 9500000, 0, 9500000),
-    (2, 2, 14900000, 0, 14900000),
-    (3, 3, 7800000, 0, 7800000),
-    (4, 4, 14900000, 0, 14900000);
