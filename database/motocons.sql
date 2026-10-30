@@ -232,3 +232,65 @@ VALUES
     (5, 'insumo', 'Revisión general', 1, 0),
     (6, 'insumo', 'Primera revisión', 1, 40000);
 
+
+-- =====================  MÓDULO: creditos  =====================
+-- Grupo: José Andrés Ríos Quiñonez, Albeiro Luis Hoyos Gonzalez, Hernan Bula Quiñonez,
+--        Carlos David Ricardo Reino, Maiver Antonio Hernandez Acosta,
+--        Juan Esteban Cardozo Ricardo, Rafael Morales · Fecha: 2026-10-29
+-- Usa tablas de otros módulos: cliente, moto, venta, vehiculo (garantia), usuario (login)
+-- No modifica tablas de otros módulos: el estado del crédito vive en solicitud_credito.
+-- Si el negocio exige que una venta quede 'PAGADA', se habla con el grupo de ventas.
+
+-- Catálogo maestro de requisitos según el medio de pago (convenio Brilla, ServiCrédito).
+CREATE TABLE requisito_credito (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    medio_pago ENUM('BRILLA', 'SERVICREDITO') NOT NULL,
+    descripcion VARCHAR(200) NOT NULL,
+    obligatorio TINYINT(1) NOT NULL DEFAULT 1
+);
+
+-- Una solicitud de crédito por venta. Aquí vive el estado del negocio de créditos:
+-- BORRADOR -> EN_PROCESO_CREDITO -> APROBADA | RECHAZADA | ANULADA.
+-- NO se altera la tabla venta: el crédito es una cosa distinta de la venta.
+CREATE TABLE solicitud_credito (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    venta_id INT NOT NULL,
+    vehiculo_id INT NULL,                    -- unidad que se reserva/entrega con este crédito
+    medio_pago ENUM('BRILLA', 'SERVICREDITO') NOT NULL,
+    estado ENUM('BORRADOR', 'EN_PROCESO_CREDITO', 'APROBADA', 'RECHAZADA', 'ANULADA')
+        NOT NULL DEFAULT 'BORRADOR',
+    monto_financiado DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    observacion VARCHAR(255) NULL,
+    registrado_por INT NULL,                 -- usuario que radicó la solicitud
+    aprobado_por INT NULL,                   -- usuario que dictaminó el crédito
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY solicitud_credito_venta_unica (venta_id),  -- una sola solicitud activa por venta
+    FOREIGN KEY (venta_id) REFERENCES venta (id),
+    FOREIGN KEY (vehiculo_id) REFERENCES vehiculo (id),
+    FOREIGN KEY (registrado_por) REFERENCES usuario (id),
+    FOREIGN KEY (aprobado_por) REFERENCES usuario (id)
+);
+
+-- Checklist de la solicitud: qué requisito está adjunto y en qué estado.
+CREATE TABLE solicitud_requisito (
+    solicitud_id INT NOT NULL,
+    requisito_id INT NOT NULL,
+    estado ENUM('PENDIENTE', 'VALIDADO', 'RECHAZADO') NOT NULL DEFAULT 'PENDIENTE',
+    soporte_adjunto VARCHAR(255) NULL,       -- ruta relativa dentro de storage/soportes/
+    validado_por INT NULL,
+    validado_en DATETIME NULL,
+    PRIMARY KEY (solicitud_id, requisito_id),
+    FOREIGN KEY (solicitud_id) REFERENCES solicitud_credito (id) ON DELETE CASCADE,
+    FOREIGN KEY (requisito_id) REFERENCES requisito_credito (id),
+    FOREIGN KEY (validado_por) REFERENCES usuario (id)
+);
+
+-- Catálogo de requisitos de prueba.
+INSERT INTO requisito_credito (medio_pago, descripcion, obligatorio) VALUES
+    ('BRILLA', 'Recibo de gas del último mes cancelado y con cupo aprobado disponible', 1),
+    ('BRILLA', 'Cédula de ciudadanía del titular ampliada al 150%', 1),
+    ('BRILLA', 'Dos referencias familiares o personales verificables', 1),
+    ('SERVICREDITO', 'Cédula de ciudadanía original del solicitante', 1),
+    ('SERVICREDITO', 'Desprendibles de nómina de los dos últimos meses', 1),
+    ('SERVICREDITO', 'Certificado laboral vigente con antigüedad mínima de 6 meses', 0);
