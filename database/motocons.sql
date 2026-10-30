@@ -232,3 +232,68 @@ VALUES
     (5, 'insumo', 'Revisión general', 1, 0),
     (6, 'insumo', 'Primera revisión', 1, 40000);
 
+-- =====================  MÓDULO: promociones  =====================
+-- Grupo: Andres Benavides Velasquez, Camilo Diaz Cabarcas, Julian Llamas Hernandez,
+--        Misael Mejia Cruz, Elias Talaigua Hoyos, Wilmer Sierra Tejada
+-- Fecha: 2026-10-30
+-- Usa tablas de otros módulos: moto (garantia)
+-- Crea tablas nuevas: promocion, promocion_aplica
+-- Modifica tabla: moto (agrega columna gama) — avisar al grupo de garantía
+
+ALTER TABLE moto
+    ADD COLUMN gama ENUM('baja', 'media', 'alta') NOT NULL DEFAULT 'media' AFTER propulsion;
+
+UPDATE moto SET gama = 'media' WHERE id = 1; -- Yamaha FZ 2.0
+UPDATE moto SET gama = 'alta'  WHERE id = 2; -- Super Soco CPx
+UPDATE moto SET gama = 'baja'  WHERE id = 3; -- Honda CB 125F
+
+CREATE TABLE promocion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    descripcion VARCHAR(255) NULL,
+    tipo_descuento ENUM('porcentaje', 'monto_fijo') NOT NULL,
+    valor DECIMAL(12, 2) NOT NULL,
+    fecha_inicio DATE NOT NULL,
+    fecha_fin DATE NOT NULL,
+    estado ENUM('activa', 'inactiva') NOT NULL DEFAULT 'activa',
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_promocion_vigencia (estado, fecha_inicio, fecha_fin)
+) ENGINE=InnoDB;
+
+-- Sin filas en promocion_aplica = la promoción aplica a todo el catálogo.
+CREATE TABLE promocion_aplica (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    promocion_id INT NOT NULL,
+    criterio ENUM('marca', 'gama', 'motocicleta') NOT NULL,
+    valor VARCHAR(80) NOT NULL,
+    FOREIGN KEY (promocion_id) REFERENCES promocion (id) ON DELETE CASCADE,
+    UNIQUE KEY uq_promocion_aplica (promocion_id, criterio, valor)
+) ENGINE=InnoDB;
+
+INSERT INTO promocion
+    (nombre, descripcion, tipo_descuento, valor, fecha_inicio, fecha_fin, estado)
+VALUES
+('Temporada Honda', 'Descuento de temporada para toda la línea Honda.',
+ 'porcentaje', 8.00, DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 'activa'),
+('Semana de la gama media', 'Beneficio para motocicletas de gama media.',
+ 'porcentaje', 12.00, DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 25 DAY), 'activa'),
+('Bono gama alta', 'Bono de compra para motocicletas de gama alta.',
+ 'monto_fijo', 800000.00, DATE_SUB(CURDATE(), INTERVAL 3 DAY), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 'activa'),
+('Descuento Yamaha FZ 2.0', 'Beneficio puntual sobre la Yamaha FZ 2.0.',
+ 'monto_fijo', 500000.00, DATE_SUB(CURDATE(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 10 DAY), 'activa'),
+('Black Friday MOTOCONS', 'Descuento general de fin de año para todo el catálogo.',
+ 'porcentaje', 15.00, DATE_ADD(CURDATE(), INTERVAL 15 DAY), DATE_ADD(CURDATE(), INTERVAL 30 DAY), 'activa'),
+('Liquidación año anterior', 'Promoción finalizada del periodo anterior.',
+ 'monto_fijo', 500000.00, DATE_SUB(CURDATE(), INTERVAL 60 DAY), DATE_SUB(CURDATE(), INTERVAL 30 DAY), 'activa'),
+('Promo interna desactivada', 'Promoción creada por error, ya no debe aplicarse.',
+ 'porcentaje', 5.00, DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 'inactiva');
+
+INSERT INTO promocion_aplica (promocion_id, criterio, valor) VALUES
+(1, 'marca', 'Honda'),
+(2, 'gama', 'media'),
+(3, 'gama', 'alta'),
+(4, 'motocicleta', '1'),
+(7, 'marca', 'Yamaha');
+-- Promociones 5 (Black Friday) y 6 (Liquidación) sin filas: aplican a todas.
+
