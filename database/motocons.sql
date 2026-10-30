@@ -156,3 +156,79 @@ INSERT INTO mantenimiento (vehiculo_id, fecha, tipo, descripcion, costo_repuesto
 -- Usuario de prueba del taller: mecanico@motocons.com / mecanico123
 INSERT INTO usuario (nombre, correo, clave, rol) VALUES
     ('Mecánico de prueba', 'mecanico@motocons.com', '$2y$12$GHinqXOnAWaIkiYlSRZXK.iOesUitgC5KY/2kM2DBnaexd.a21QYW', 'mecanico');
+
+-- =====================  MÓDULO: mantenimiento  =====================
+-- Grupo: Leocarlos Ospina Causil, Caleb Seña Melo, Jhonatan David Cantero Hernández,
+--        Miguel Andrés De Aguas Martínez, Joel David Toscano Cafiel, Adrian Ricardo Villazon Ascanio
+-- Fecha: 2026-10-29
+-- Usa tablas de otros módulos: motos (inventario), usuarios (login)
+-- Crea tablas nuevas: detalle_mantenimiento.
+-- Modifica tabla: mantenimiento
+
+
+
+-- 1) La tabla mantenimiento ya existe: se le agregan columnas
+--    para enlazar el recibo y guardar el total calculado.
+
+ALTER TABLE mantenimiento
+    ADD COLUMN numero_servicio INT NULL AFTER id,
+    ADD COLUMN total DECIMAL(12, 2) NOT NULL DEFAULT 0 AFTER costo_mano_obra,
+    ADD COLUMN usuario_id INT NULL AFTER vehiculo_id,
+    ADD CONSTRAINT fk_mantenimiento_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuario (id);
+
+        
+-- actualizacion de los datos de prueba para reflejar los cambios en la tabla mantenimiento
+UPDATE mantenimiento
+SET numero_servicio = 1,
+    total = costo_repuestos + costo_mano_obra
+WHERE id = 1;
+
+UPDATE mantenimiento
+SET numero_servicio = 1,
+    total = costo_repuestos + costo_mano_obra
+WHERE id = 2;
+
+UPDATE mantenimiento
+SET numero_servicio = 2,
+    total = costo_repuestos + costo_mano_obra
+WHERE id = 3;
+
+UPDATE mantenimiento
+SET numero_servicio = 3,
+    total = costo_repuestos + costo_mano_obra
+WHERE id = 4;
+
+UPDATE mantenimiento
+SET numero_servicio = 4,
+    total = costo_repuestos + costo_mano_obra
+WHERE id = 5;
+
+UPDATE mantenimiento
+SET numero_servicio = 1,
+    total = costo_repuestos + costo_mano_obra
+WHERE id = 6;
+
+-- 2) Detalle de repuestos e insumos usados en cada mantenimiento
+CREATE TABLE detalle_mantenimiento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mantenimiento_id INT NOT NULL,
+    tipo ENUM('repuesto', 'insumo') NOT NULL,
+    descripcion VARCHAR(200) NOT NULL,
+    cantidad INT NOT NULL,
+    valor_unitario DECIMAL(12, 2) NOT NULL,
+    FOREIGN KEY (mantenimiento_id)
+        REFERENCES mantenimiento (id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+INSERT INTO detalle_mantenimiento
+    (mantenimiento_id, tipo, descripcion, cantidad, valor_unitario)
+VALUES
+    (1, 'insumo', 'Aceite semi-sintético', 1, 45000),
+    (2, 'insumo', 'Revisión de batería', 1, 0),
+    (3, 'insumo', 'Actualización del controlador', 1, 0),
+    (4, 'repuesto', 'Pastillas de freno', 1, 80000),
+    (5, 'insumo', 'Revisión general', 1, 0),
+    (6, 'insumo', 'Primera revisión', 1, 40000);
+

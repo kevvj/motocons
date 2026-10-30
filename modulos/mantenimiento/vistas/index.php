@@ -1,13 +1,11 @@
 <?php
-$fecha      = static fn(string $f): string => date('d/m/Y', strtotime($f));
-$pesos      = static fn($v): string => '$' . number_format((float) $v, 0, ',', '.');
-$estado     = static fn(array $m): string => $m['aplica_garantia'] ? 'es-garantia' : 'es-pagado';
-$hoy        = date('Y-m-d');
+$fecha = static fn(string $valor): string => date('d/m/Y', strtotime($valor));
+$pesos = static fn($valor): string => '$' . number_format((float) $valor, 0, ',', '.');
+$hoy = date('Y-m-d');
 ?>
 <h1>Taller y mantenimientos</h1>
 <p class="mantenimiento-subtitulo">
-    Cada moto nueva tiene <strong><?= (int) $tope_garantia ?> servicios de garantía</strong> con mano de obra gratis.
-    Al terminarse la garantía o los <?= (int) $tope_garantia ?> servicios, la mano de obra se cobra.
+    Registra servicios, controla los tres mantenimientos de garantía y consulta las facturas de cada vehículo.
 </p>
 
 <?php if (!empty($mensaje)): ?>
@@ -17,154 +15,213 @@ $hoy        = date('Y-m-d');
     <div class="alerta alerta-error"><?= htmlspecialchars($error) ?></div>
 <?php endif; ?>
 
-<form class="tarjeta mantenimiento-buscador" method="get" action="index.php">
-    <input type="hidden" name="r" value="mantenimiento/index">
-    <div class="campo mantenimiento-valor">
-        <label for="q">Buscar moto</label>
-        <input id="q" name="q" value="<?= htmlspecialchars($busqueda) ?>"
-               placeholder="Placa, factura, documento o nombre del cliente">
+<section class="tarjeta mantenimiento-registro">
+    <div class="mantenimiento-cabecera">
+        <div>
+            <h2>Registrar mantenimiento</h2>
+            <p class="mantenimiento-subtitulo">Los servicios 1 a 3 tienen mano de obra gratis; los repuestos e insumos siempre se cobran.</p>
+        </div>
     </div>
-    <button type="submit" class="btn">Buscar</button>
-    <?php if ($busqueda !== ''): ?>
-        <a class="btn btn-secundario" href="index.php?r=mantenimiento/index">Limpiar</a>
-    <?php endif; ?>
-</form>
 
-<?php if (!$seleccionada): ?>
-    <?php if (!$motos): ?>
-        <div class="alerta alerta-aviso">No hay motos vendidas que coincidan con la búsqueda.</div>
-    <?php else: ?>
-        <div class="rejilla mantenimiento-motos">
+    <form method="post" action="index.php?r=mantenimiento/registrar">
+        <div class="mantenimiento-form-grid">
+            <div class="campo">
+                <label for="moto_id">Moto asignada</label>
+                <select id="moto_id" name="moto_id" required>
+                    <option value="">Selecciona una moto...</option>
+                    <?php foreach ($motos as $moto): ?>
+                        <option value="<?= (int) $moto['id_moto'] ?>"
+                            <?= $seleccionada && (int) $seleccionada['id_moto'] === (int) $moto['id_moto'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars(($moto['placa'] ?? 'Sin placa') . ' · ' . $moto['marca'] . ' ' . $moto['modelo'] . ' · ' . $moto['cliente_nombre']) ?>
+                            · <?= (int) $moto['garantias_usadas'] ?>/<?= (int) $tope_garantia ?> garantías
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="fecha">Fecha del servicio</label>
+                <input id="fecha" name="fecha" type="date" value="<?= $hoy ?>" max="<?= $hoy ?>" required>
+            </div>
+        </div>
+
+        <div class="mantenimiento-lineas">
+            <div class="mantenimiento-seccion-titulo">
+                <strong>Ítems y conceptos del servicio</strong>
+                <span>Las filas vacías se ignoran.</span>
+            </div>
+            <div class="tabla-scroll">
+                <table class="tabla mantenimiento-tabla-lineas">
+                    <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th class="numero">Cantidad</th>
+                        <th class="numero">Valor unitario</th>
+                    </tr>
+                    </thead>
+                    <tbody id="lineas-mantenimiento">
+                    <?php for ($i = 0; $i < 4; $i++): ?>
+                        <tr>
+                            <td>
+                                <select name="linea_tipo[]" class="mantenimiento-input">
+                                    <option value="insumo">Insumo</option>
+                                    <option value="repuesto">Repuesto</option>
+                                </select>
+                            </td>
+                            <td><input name="linea_desc[]" class="mantenimiento-input" type="text" maxlength="200" placeholder="Descripción del repuesto o insumo"></td>
+                            <td><input name="linea_cant[]" class="mantenimiento-input numero" type="number" min="1" value="1"></td>
+                            <td><input name="linea_valor[]" class="mantenimiento-input numero" type="number" min="0" step="0.01" placeholder="0"></td>
+                        </tr>
+                    <?php endfor; ?>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-secundario btn-chico" id="agregar-linea">+ Agregar línea</button>
+        </div>
+
+        <div class="alerta alerta-aviso mantenimiento-regla">
+            <strong>Condición de garantía:</strong> mano de obra gratis en los servicios 1 a 3; desde el cuarto servicio se cobran <?= $pesos(30000) ?>.
+        </div>
+        <button type="submit" class="btn">Registrar mantenimiento</button>
+    </form>
+</section>
+
+<section class="tarjeta">
+    <div class="mantenimiento-cabecera">
+        <div>
+            <h2>Motos y mantenimientos</h2>
+            <p class="mantenimiento-subtitulo">Consulta servicios, garantías utilizadas y facturas.</p>
+        </div>
+    </div>
+
+    <form class="mantenimiento-buscador" method="get" action="index.php">
+        <input type="hidden" name="r" value="mantenimiento/index">
+        <div class="campo mantenimiento-valor">
+            <label for="q">Buscar por placa, chasis, factura o cliente</label>
+            <input id="q" name="q" value="<?= htmlspecialchars($busqueda) ?>" placeholder="Ej.: ABC12D">
+        </div>
+        <button type="submit" class="btn">Filtrar</button>
+        <?php if ($busqueda !== ''): ?>
+            <a class="btn btn-secundario" href="index.php?r=mantenimiento/index">Limpiar</a>
+        <?php endif; ?>
+    </form>
+
+    <div class="tabla-scroll">
+        <table class="tabla mantenimiento-tabla">
+            <thead>
+            <tr>
+                <th>Placa</th>
+                <th>Referencia</th>
+                <th>Cliente</th>
+                <th>Garantías usadas</th>
+                <th>Restantes</th>
+                <th>Estado</th>
+                <th class="centrado">Facturas</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php if (!$motos): ?>
+                <tr><td colspan="7" class="tabla-vacia">No se encontraron vehículos para la búsqueda.</td></tr>
+            <?php endif; ?>
             <?php foreach ($motos as $moto): ?>
-                <a class="tarjeta mantenimiento-moto <?= $estado($moto) ?>"
-                   href="index.php?r=mantenimiento/index&amp;ver_moto=<?= (int) $moto['id_moto'] ?>&amp;q=<?= urlencode($busqueda) ?>">
-                    <span class="mantenimiento-sello">
-                        <?= $moto['aplica_garantia'] ? 'Garantía disponible' : 'Fuera de garantía' ?>
-                    </span>
-                    <strong><?= htmlspecialchars($moto['marca'] . ' ' . $moto['modelo']) ?></strong>
-                    <span>Placa <?= htmlspecialchars($moto['placa'] ?? 'sin placa') ?></span>
-                    <span>Cliente: <?= htmlspecialchars($moto['cliente_nombre']) ?></span>
-                    <span class="mantenimiento-moto-fin">
-                        <?= (int) $moto['garantias_usadas'] ?> de <?= (int) $tope_garantia ?> garantías usadas ·
-                        <?php if ($moto['vencida_por_tiempo']): ?>
-                            venció el <?= $fecha($moto['fecha_fin_garantia']) ?>
-                        <?php else: ?>
-                            <?= (int) $moto['garantias_restantes'] ?> disponibles
-                        <?php endif; ?>
-                    </span>
-                </a>
+                <?php
+                $idMoto = (int) $moto['id_moto'];
+                $usadas = (int) $moto['garantias_usadas'];
+                $restantes = (int) $moto['garantias_restantes'];
+                $vigente = (bool) $moto['garantia_vigente'];
+                ?>
+                <tr>
+                    <td><span class="mantenimiento-placa"><?= htmlspecialchars($moto['placa'] ?? 'Sin placa') ?></span></td>
+                    <td>
+                        <strong><?= htmlspecialchars($moto['marca'] . ' ' . $moto['modelo']) ?></strong>
+                        <small><?= htmlspecialchars($moto['propulsion']) ?> · <?= htmlspecialchars($moto['chasis']) ?></small>
+                    </td>
+                    <td>
+                        <?= htmlspecialchars($moto['cliente_nombre']) ?>
+                        <small>CC <?= htmlspecialchars($moto['cliente_documento']) ?></small>
+                    </td>
+                    <td>
+                        <div class="mantenimiento-segmentos" aria-label="<?= $usadas ?> de <?= (int) $tope_garantia ?> garantías usadas">
+                            <?php for ($segmento = 1; $segmento <= $tope_garantia; $segmento++): ?>
+                                <span class="<?= $segmento <= $usadas ? ($vigente ? 'usado' : 'agotado') : '' ?>"></span>
+                            <?php endfor; ?>
+                        </div>
+                        <small><?= $usadas ?> / <?= (int) $tope_garantia ?></small>
+                    </td>
+                    <td><?= $restantes > 0 ? $restantes . ' servicio' . ($restantes === 1 ? '' : 's') : '0 servicios' ?></td>
+                    <td><span class="mantenimiento-estado <?= $vigente ? 'vigente' : 'agotada' ?>"><?= $vigente ? 'Garantía vigente' : 'Garantía agotada' ?></span></td>
+                    <td class="centrado">
+                        <button type="button" class="btn btn-chico" onclick="document.getElementById('facturas-<?= $idMoto ?>').showModal()">Ver facturas (<?= count($moto['facturas']) ?>)</button>
+                        <dialog id="facturas-<?= $idMoto ?>" class="mantenimiento-dialog" onclick="if (event.target === this) this.close()">
+                            <div class="dialog-cabecera">
+                                <div>
+                                    <h2>Historial de facturas</h2>
+                                    <p><?= htmlspecialchars(($moto['placa'] ?? 'Sin placa') . ' · ' . $moto['marca'] . ' ' . $moto['modelo']) ?></p>
+                                </div>
+                                <button type="button" class="dialog-cerrar" onclick="this.closest('dialog').close()" aria-label="Cerrar">×</button>
+                            </div>
+                            <div class="dialog-cuerpo">
+                                <p><strong>Propietario:</strong> <?= htmlspecialchars($moto['cliente_nombre']) ?> · CC <?= htmlspecialchars($moto['cliente_documento']) ?></p>
+                                <?php if (!$moto['facturas']): ?>
+                                    <p class="tabla-vacia">Esta motocicleta aún no tiene mantenimientos registrados.</p>
+                                <?php else: ?>
+                                    <div class="facturas-grid">
+                                        <?php foreach ($moto['facturas'] as $factura): ?>
+                                            <?php $esGarantia = $factura['tipo'] === 'garantia'; ?>
+                                            <article class="factura <?= $esGarantia ? '' : 'factura-pagada' ?>">
+                                                <header>
+                                                    <div>
+                                                        <strong>Servicio #<?= (int) $factura['numero_servicio'] ?> · <?= $fecha($factura['fecha']) ?></strong>
+                                                        <small><?= htmlspecialchars($factura['mecanico_nombre'] ?? 'Usuario no disponible') ?></small>
+                                                    </div>
+                                                    <span class="mantenimiento-estado <?= $esGarantia ? 'vigente' : 'pagada' ?>"><?= $esGarantia ? 'Garantía' : 'Pagado' ?></span>
+                                                </header>
+                                                <table class="tabla factura-tabla">
+                                                    <thead><tr><th>Tipo</th><th>Descripción</th><th class="numero">Cant.</th><th class="numero">Subtotal</th></tr></thead>
+                                                    <tbody>
+                                                    <?php foreach ($factura['lineas'] as $linea): ?>
+                                                        <tr>
+                                                            <td><?= htmlspecialchars(ucfirst($linea['tipo'])) ?></td>
+                                                            <td><?= htmlspecialchars($linea['descripcion']) ?></td>
+                                                            <td class="numero"><?= (int) $linea['cantidad'] ?></td>
+                                                            <td class="numero"><?= $pesos((int) $linea['cantidad'] * (float) $linea['valor_unitario']) ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                    <tr class="factura-mano-obra">
+                                                        <td colspan="3"><strong>Mano de obra</strong></td>
+                                                        <td class="numero"><?= $esGarantia ? 'Gratis' : $pesos($factura['costo_mano_obra']) ?></td>
+                                                    </tr>
+                                                    <tr class="factura-total"><td colspan="3">TOTAL</td><td class="numero"><?= $pesos($factura['total']) ?></td></tr>
+                                                    </tbody>
+                                                </table>
+                                            </article>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <footer><button type="button" class="btn btn-secundario" onclick="this.closest('dialog').close()">Cerrar</button></footer>
+                        </dialog>
+                    </td>
+                </tr>
             <?php endforeach; ?>
-        </div>
-    <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<script>
+document.getElementById('agregar-linea').addEventListener('click', function () {
+    const fila = document.createElement('tr');
+    fila.innerHTML = `
+        <td><select name="linea_tipo[]" class="mantenimiento-input"><option value="insumo">Insumo</option><option value="repuesto">Repuesto</option></select></td>
+        <td><input name="linea_desc[]" class="mantenimiento-input" type="text" maxlength="200" placeholder="Descripción del repuesto o insumo"></td>
+        <td><input name="linea_cant[]" class="mantenimiento-input numero" type="number" min="1" value="1"></td>
+        <td><input name="linea_valor[]" class="mantenimiento-input numero" type="number" min="0" step="0.01" placeholder="0"></td>
+    `;
+    document.getElementById('lineas-mantenimiento').appendChild(fila);
+});
+<?php if (!empty($_GET['ver_moto'])): ?>
+const facturaDialogo = document.getElementById('facturas-<?= (int) $_GET['ver_moto'] ?>');
+if (facturaDialogo) facturaDialogo.showModal();
 <?php endif; ?>
-
-<?php if ($seleccionada): ?>
-    <section class="mantenimiento-panel">
-        <div class="tarjeta">
-            <div class="mantenimiento-cabecera">
-                <div>
-                    <h2>Registrar servicio</h2>
-                    <p class="mantenimiento-subtitulo">
-                        <?= htmlspecialchars($seleccionada['marca'] . ' ' . $seleccionada['modelo']) ?>
-                        · Placa <?= htmlspecialchars($seleccionada['placa'] ?? 'sin placa') ?>
-                    </p>
-                </div>
-                <a class="btn btn-secundario btn-chico"
-                   href="index.php?r=mantenimiento/index&amp;q=<?= urlencode($busqueda) ?>">Cambiar moto</a>
-            </div>
-
-            <form method="post" action="index.php?r=mantenimiento/registrar">
-                <input type="hidden" name="moto_id" value="<?= (int) $seleccionada['id_moto'] ?>">
-
-                <div class="campo">
-                    <label for="fecha">Fecha del servicio</label>
-                    <input id="fecha" name="fecha" type="date" value="<?= $hoy ?>" max="<?= $hoy ?>" required>
-                </div>
-
-                <div class="campo">
-                    <label for="descripcion">Descripción del servicio</label>
-                    <input id="descripcion" name="descripcion" type="text" maxlength="255"
-                           placeholder="Ej.: cambio de aceite y ajuste de cadena" required>
-                </div>
-
-                <div class="campo">
-                    <label for="costo_repuestos">Costo de repuestos e insumos</label>
-                    <input id="costo_repuestos" name="costo_repuestos" type="number"
-                           min="0" step="0.01" value="0" required>
-                    <p class="mantenimiento-ayuda">La mano de obra se agrega automáticamente según la garantía.</p>
-                </div>
-
-                <?php if ($seleccionada['aplica_garantia']): ?>
-                    <div class="alerta alerta-exito mantenimiento-regla">
-                        Este servicio se registrará como <strong>garantía</strong>: la mano de obra no se cobra.
-                    </div>
-                <?php else: ?>
-                    <div class="alerta alerta-aviso mantenimiento-regla">
-                        Este servicio se registrará como <strong>pagado</strong>: incluye
-                        <?= $pesos($mano_obra) ?> de mano de obra.
-                    </div>
-                <?php endif; ?>
-
-                <button type="submit" class="btn">Registrar servicio</button>
-            </form>
-        </div>
-
-        <aside class="tarjeta mantenimiento-resumen <?= $estado($seleccionada) ?>">
-            <span class="mantenimiento-sello">
-                <?= $seleccionada['aplica_garantia'] ? 'Garantía disponible' : 'Fuera de garantía' ?>
-            </span>
-            <h2>Estado de la garantía</h2>
-
-            <dl class="mantenimiento-datos">
-                <dt>Cliente</dt>
-                <dd><?= htmlspecialchars($seleccionada['cliente_nombre']) ?></dd>
-                <dt>Documento</dt>
-                <dd><?= htmlspecialchars($seleccionada['cliente_documento']) ?></dd>
-                <dt>Factura</dt>
-                <dd><?= htmlspecialchars($seleccionada['numero_factura']) ?></dd>
-                <dt>Compra</dt>
-                <dd><?= $fecha($seleccionada['fecha_compra']) ?></dd>
-                <dt>Garantía hasta</dt>
-                <dd><?= $fecha($seleccionada['fecha_fin_garantia']) ?></dd>
-            </dl>
-
-            <p class="mantenimiento-contador">
-                <strong><?= (int) $seleccionada['garantias_usadas'] ?></strong> de <?= (int) $tope_garantia ?> servicios de garantía usados
-            </p>
-
-            <p class="mantenimiento-nota">
-                <?php if ($seleccionada['vencida_por_tiempo']): ?>
-                    La garantía venció el <?= $fecha($seleccionada['fecha_fin_garantia']) ?>.
-                <?php elseif ($seleccionada['tope_alcanzado']): ?>
-                    Ya se usaron los <?= (int) $tope_garantia ?> servicios de garantía.
-                <?php elseif ((int) $seleccionada['garantias_restantes'] === 1): ?>
-                    Queda 1 servicio de garantía disponible.
-                <?php else: ?>
-                    Quedan <?= (int) $seleccionada['garantias_restantes'] ?> servicios de garantía disponibles.
-                <?php endif; ?>
-            </p>
-        </aside>
-    </section>
-
-    <?php
-    // El historial completo vive en el módulo garantia; aquí solo se enlaza.
-    $criterioHistorial = !empty($seleccionada['placa']) ? 'placa' : 'factura';
-    $valorHistorial    = $criterioHistorial === 'placa'
-        ? $seleccionada['placa']
-        : $seleccionada['numero_factura'];
-    ?>
-    <section class="tarjeta mantenimiento-historial">
-        <div class="mantenimiento-cabecera">
-            <div>
-                <h2>Historial de mantenimientos</h2>
-                <p class="mantenimiento-subtitulo">
-                    El historial completo y el estado de la garantía se consultan en el módulo de Garantía.
-                </p>
-            </div>
-            <a class="btn btn-secundario btn-chico"
-               href="index.php?r=garantia/index&amp;criterio=<?= $criterioHistorial ?>&amp;valor=<?= urlencode($valorHistorial) ?>">
-                Ver en Garantía
-            </a>
-        </div>
-    </section>
-<?php endif; ?>
+</script>
