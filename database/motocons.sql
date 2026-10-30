@@ -162,7 +162,7 @@ INSERT INTO usuario (nombre, correo, clave, rol) VALUES
 --        Miguel Andrés De Aguas Martínez, Joel David Toscano Cafiel, Adrian Ricardo Villazon Ascanio
 -- Fecha: 2026-10-29
 -- Usa tablas de otros módulos: motos (inventario), usuarios (login)
--- Crea tablas nuevas: detalle_mantenimiento, detalle_venta
+-- Crea tablas nuevas: detalle_mantenimiento.
 -- Modifica tabla: mantenimiento
 
 
