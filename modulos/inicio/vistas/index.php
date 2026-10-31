@@ -1,6 +1,11 @@
 <h1>MOTOCONS</h1>
 <p class="inicio-subtitulo">Elige un módulo para entrar.</p>
 
+<div class="alerta alerta-aviso">
+    Esta página de inicio es temporal: sirve para ver y probar los módulos de cada grupo mientras se integran.
+    No es el diseño final de la tienda; se cambiará cuando el proyecto esté más avanzado.
+</div>
+
 <?php if (!$modulos): ?>
     <div class="alerta alerta-aviso">Todavía no hay módulos. Cada grupo agrega el suyo con un <code>modulo.php</code> en su carpeta.</div>
 <?php else: ?>

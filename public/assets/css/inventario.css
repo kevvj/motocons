@@ -1,0 +1,186 @@
+/* Solo para el módulo de inventario. Lo común está en estilos.css */
+.inventario-subtitulo { margin: 0 0 1.5rem; color: var(--color-texto-suave); }
+
+/**
+ * SISTEMA DESIGN UNIFICADO: MÓDULO INVENTARIO Y PROVEEDORES
+ * Limpieza absoluta de estilos inline traspasados a clases nativas CSS.
+ */
+
+/* CONTENEDORES GLOBALES */
+.seccion-tabla {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.contenido-consulta {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    border: 1px solid #edf2f9;
+}
+
+.tarjeta-registro {
+    background: #ffffff;
+    border: 1px solid #edf2f9;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.01);
+}
+
+.tarjeta-registro:last-child {
+    margin-bottom: 0;
+}
+
+.titulo-bloque {
+    font-size: 1.15rem;
+    color: #1a202c;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.titulo-bloque::before {
+    content: "|";
+    color: #ff6b00;
+    font-weight: 900;
+}
+
+.formulario-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.formulario-columna {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+}
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo-formulario label, .control-filtro label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #2d3748 !important;
+    margin-bottom: 0;
+    letter-spacing: 0.5px;
+}
+
+.campo-formulario input[type="text"],
+.campo-formulario input[type="number"],
+.campo-formulario input[type="tel"],
+.campo-formulario input[type="email"],
+.campo-formulario input[type="search"],
+.campo-formulario select,
+.control-filtro select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+    color: #2d3748;
+    background-color: #ffffff;
+    transition: border-color 0.15s ease;
+}
+
+.campo-formulario input:focus, .campo-formulario select:focus {
+    border-color: #ff6b00;
+    outline: none;
+}
+
+/* GRUPO ESPECÍFICO DEL CHECKBOX ELÉCTRICA */
+.campo-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.campo-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.campo-checkbox label {
+    margin-bottom: 0;
+    cursor: pointer;
+    text-transform: none;
+    font-size: 0.95rem;
+    color: #2d3748 !important;
+    font-weight: 500;
+}
+
+/* BOTONES INTEGRADOS TOTALMENTE CENTRADOS */
+.btn-naranja, .btn-oscuro {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 24px !important;
+    height: 41px !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+    transition: background 0.15s ease-in-out !important;
+}
+
+.btn-naranja {
+    background: #ff6b00 !important;
+    color: #ffffff !important;
+}
+
+.btn-naranja:hover {
+    background: #e05e00 !important;
+}
+
+.btn-oscuro {
+    background: #2d3748 !important;
+    color: #ffffff !important;
+}
+
+.btn-oscuro:hover {
+    background: #1a202c !important;
+}
+
+
+/* RESTO DEL CSS REUTILIZABLE (PESTAÑAS Y TABLAS) */
+.pestanas-consulta { display: flex; gap: 4px; border-bottom: 1px solid #dee2e6; margin-bottom: 20px; }
+.pestana-consulta { padding: 10px 22px; font-size: 0.9rem; font-weight: 600; color: #495057; background-color: #f8fafd; border: 1px solid #dee2e6; border-bottom: none; border-top-left-radius: 6px; border-top-right-radius: 6px; cursor: pointer; text-decoration: none; }
+.pestana-consulta:hover { color: #ff6b00 !important; background-color: #fffdfa; }
+.pestana-consulta.activa { background-color: #ffffff; color: #ff6b00 !important; border-color: #dee2e6 #dee2e6 #ffffff; border-top: 3px solid #ff6b00 !important; position: relative; z-index: 2; }
+.tabla-responsiva { width: 100%; overflow-x: auto; border: 1px solid #edf2f9; border-radius: 8px; background: #ffffff; }
+.tabla-responsiva table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
+.tabla-responsiva th { background: #f8fafd; padding: 14px 18px; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; color: #718096; border-bottom: 2px solid #edf2f9; }
+.tabla-responsiva td { padding: 14px 18px; border-bottom: 1px solid #edf2f9; color: #2d3748; vertical-align: middle; }
+.tabla-responsiva tbody tr:hover { background-color: #fcfdfe; }
+.inventario-serial { background: #edf2f7; color: #4a5568; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; font-weight: 600; display: inline-block; }
+.inventario-badge { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; display: inline-block; text-transform: lowercase; }
+.inventario-badge.disponible, .inventario-badge.activo { background: #c6f6d5; color: #22543d; }
+.inventario-badge.reservada { background: #feebc8; color: #c05621; }
+.inventario-badge.vendida, .inventario-badge.inactivo { background: #fed7d7; color: #c53030; }
+.texto-carga { padding: 30px !important; text-align: center; color: #a0aec0; font-style: italic; }
+.panel-filtros-stock, .busqueda-proveedores { background: #f8fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+.grupo-selects-filtros { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; }
+.control-filtro { flex: 1; min-width: 160px; }
