@@ -1,0 +1,223 @@
+/* Solo para el módulo de ventas en tienda. Lo común está en estilos.css */
+
+/* ---------- Cabecera de cada página ---------- */
+.vp-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-oscuro);
+}
+.vp-cabecera h1 { margin-bottom: 0.25rem; }
+.vp-antetitulo {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-primario);
+}
+.vp-subtitulo { margin: 0; color: var(--color-texto-suave); }
+.vp-botones { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.vp-nota { margin: 0.5rem 0 0; font-size: 0.875rem; color: var(--color-texto-suave); }
+.vp-suave { color: var(--color-texto-suave); }
+.vp-enlace { display: block; font-size: 0.85rem; font-weight: 500; }
+
+/* ---------- Listado: filtros por estado y buscador ---------- */
+.vp-filtros { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.vp-filtro {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem 0.4rem 1rem;
+    border: 1.5px solid var(--color-borde);
+    border-radius: var(--radio-boton);
+    color: var(--color-texto);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color var(--transicion), background var(--transicion);
+}
+.vp-filtro span {
+    min-width: 1.6rem;
+    padding: 0 0.45rem;
+    border-radius: var(--radio-boton);
+    background: var(--color-fondo-suave);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+}
+.vp-filtro:hover { border-color: var(--color-oscuro); }
+.vp-filtro.es-activo { border-color: var(--color-oscuro); background: var(--color-oscuro); color: var(--color-blanco); }
+.vp-filtro.es-activo span { background: var(--color-primario); color: var(--color-blanco); }
+
+.vp-buscador { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem; margin-bottom: 1.5rem; }
+.vp-buscador .campo { flex: 1; min-width: 240px; margin: 0; }
+
+/* ---------- Tablas ---------- */
+.vp-tabla { overflow-x: auto; }
+.vp-tabla .tabla { min-width: 760px; }
+.vp-tabla td small { display: block; font-size: 0.8rem; color: var(--color-texto-suave); }
+.vp-numero-col { text-align: right !important; white-space: nowrap; }
+.vp-vacio { padding: 2.5rem 1rem !important; text-align: center !important; color: var(--color-texto-suave); }
+.vp-factura { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.vp-codigo { font-size: 0.875rem; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+.vp-fila-total td { border-top: 2px solid var(--color-oscuro); border-bottom: 0; font-weight: 700; font-size: 1.1rem; color: var(--color-oscuro); }
+
+/* ---------- Estados ---------- */
+.vp-estado {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radio-boton);
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--color-texto-suave);
+    background: var(--color-fondo-suave);
+}
+.vp-estado.estado-pendiente { color: var(--color-aviso); background: color-mix(in srgb, var(--color-aviso) 12%, var(--color-blanco)); }
+.vp-estado.estado-en-credito { color: var(--color-oscuro); background: var(--color-blanco); box-shadow: inset 0 0 0 1.5px var(--color-oscuro); }
+.vp-estado.estado-pagada { color: var(--color-exito); background: color-mix(in srgb, var(--color-exito) 12%, var(--color-blanco)); }
+.vp-estado.estado-entregada { color: var(--color-blanco); background: var(--color-exito); }
+.vp-estado.estado-anulada { color: var(--color-error); background: color-mix(in srgb, var(--color-error) 10%, var(--color-blanco)); }
+.vp-estado-grande { padding: 0.35rem 1rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ---------- Nueva venta: pasos a la izquierda, resumen fijo a la derecha ---------- */
+.vp-venta { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 2.5rem; align-items: start; }
+.vp-seccion { padding: 1.75rem 0; border-top: 1px solid var(--color-borde); }
+.vp-seccion:first-child { padding-top: 0; border-top: 0; }
+.vp-seccion-titulo { display: flex; align-items: baseline; gap: 0.9rem; margin-bottom: 1.25rem; }
+.vp-seccion-titulo h2 { margin: 0; }
+.vp-paso { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.08em; color: var(--color-primario); }
+
+.vp-documento { display: flex; align-items: flex-end; gap: 0.75rem; }
+.vp-documento .campo { flex: 0 1 320px; margin: 0; }
+.vp-campos-cliente { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; margin-top: 1.25rem; }
+.vp-campo-ancho { grid-column: 1 / -1; }
+.vp-campos-cliente input[readonly] { background: var(--color-fondo-suave); color: var(--color-texto-suave); }
+#cliente-estado.es-encontrado { color: var(--color-exito); font-weight: 500; }
+#cliente-estado.es-nuevo { color: var(--color-oscuro); font-weight: 500; }
+
+.vp-unidades { min-width: 680px; }
+/* .btn tiene display propio: sin esto el atributo hidden no oculta los botones */
+.vp-venta [hidden] { display: none !important; }
+
+.vp-unidades td { vertical-align: middle; }
+.vp-unidades th:first-child { width: 36%; }
+.vp-unidades select { min-width: 200px; }
+.vp-quitar-col { width: 1%; }
+.vp-input {
+    width: 100%;
+    min-width: 120px;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    font: inherit;
+    background: var(--color-blanco);
+    transition: border-color var(--transicion), box-shadow var(--transicion);
+}
+.vp-input:focus { outline: none; border-color: var(--color-primario); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primario) 15%, transparent); }
+.vp-mayusculas { text-transform: uppercase; }
+.vp-mayusculas::placeholder { text-transform: none; }
+.vp-pie-seccion { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin-top: 1rem; }
+.vp-pie-seccion .vp-nota { margin: 0; }
+
+.vp-opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.vp-opcion {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    border: 1.5px solid var(--color-borde);
+    border-radius: var(--radio);
+    color: var(--color-texto-suave);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color var(--transicion), background var(--transicion);
+}
+.vp-opcion strong { display: block; margin-bottom: 0.2rem; font-size: 1rem; color: var(--color-oscuro); }
+.vp-opcion input { flex-shrink: 0; margin: 0.3rem 0 0; accent-color: var(--color-primario); }
+.vp-opcion:hover { border-color: var(--color-oscuro); }
+.vp-opcion:has(input:checked) { border-color: var(--color-primario); background: color-mix(in srgb, var(--color-primario) 5%, var(--color-blanco)); }
+.vp-opcion:has(input:focus-visible) { outline: 2px solid var(--color-primario); outline-offset: 2px; }
+
+.vp-resumen {
+    position: sticky;
+    top: 5.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-borde);
+    border-top: 4px solid var(--color-primario);
+    border-radius: var(--radio);
+    background: var(--color-blanco);
+}
+.vp-resumen dl { margin: 0 0 1rem; }
+.vp-resumen dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-texto-suave); }
+.vp-resumen dd { margin: 0 0 0.75rem; font-size: 1.1rem; font-weight: 600; color: var(--color-oscuro); }
+.vp-total { font-size: clamp(1.75rem, 3vw, 2.25rem) !important; font-weight: 700 !important; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.vp-resumen .btn { margin-top: 1.25rem; }
+
+/* ---------- Detalle de la venta ---------- */
+.vp-recorrido { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0 0 2rem; padding: 0; list-style: none; }
+.vp-recorrido li {
+    position: relative;
+    padding-top: 1.6rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-texto-suave);
+}
+.vp-recorrido li::before { content: ""; position: absolute; top: 0.45rem; left: 0; right: 0; height: 2px; background: var(--color-borde); }
+.vp-recorrido li::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid var(--color-borde);
+    border-radius: 50%;
+    background: var(--color-blanco);
+}
+.vp-recorrido li.es-hecho { color: var(--color-oscuro); }
+.vp-recorrido li.es-hecho::before { background: var(--color-oscuro); }
+.vp-recorrido li.es-hecho::after { border-color: var(--color-oscuro); background: var(--color-oscuro); }
+.vp-recorrido li.es-actual { color: var(--color-primario); font-weight: 700; }
+.vp-recorrido li.es-actual::after { border-color: var(--color-primario); background: var(--color-primario); }
+
+.vp-detalle { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 1.5rem; align-items: start; }
+.vp-detalle .tarjeta h2 { font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.vp-datos { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1.5rem; margin: 0 0 2rem; }
+.vp-datos dt { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-texto-suave); align-self: center; }
+.vp-datos dd { margin: 0; }
+.vp-estado-tarjeta { position: sticky; top: 5.5rem; border-top: 4px solid var(--color-texto-suave); }
+.vp-estado-tarjeta.estado-pendiente { border-top-color: var(--color-aviso); }
+.vp-estado-tarjeta.estado-en-credito { border-top-color: var(--color-oscuro); }
+.vp-estado-tarjeta.estado-pagada,
+.vp-estado-tarjeta.estado-entregada { border-top-color: var(--color-exito); }
+.vp-estado-tarjeta.estado-anulada { border-top-color: var(--color-error); }
+.vp-acciones { display: grid; gap: 0.6rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--color-borde); }
+.vp-acciones form { margin: 0; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 768px) {
+    .vp-cabecera { align-items: flex-start; flex-direction: column; }
+    /* minmax(0, 1fr): la tabla de motos se desplaza sola y no ensancha la página */
+    .vp-venta, .vp-detalle, .vp-opciones, .vp-campos-cliente { grid-template-columns: minmax(0, 1fr); }
+    .vp-documento { flex-wrap: wrap; }
+    .vp-documento .campo { flex-basis: 100%; }
+    .vp-resumen, .vp-estado-tarjeta { position: static; }
+    .vp-datos { grid-template-columns: 1fr; gap: 0; }
+    .vp-datos dt { margin-top: 0.5rem; }
+    .vp-recorrido li { font-size: 0.75rem; }
+}
+
+/* ---------- Comprobante impreso ---------- */
+@media print {
+    .barra, .pie, .vp-botones, .vp-acciones, .vp-enlace, .alerta { display: none !important; }
+    .contenedor { padding: 0; }
+    .tarjeta { box-shadow: none; }
+    .vp-detalle { grid-template-columns: 1fr; }
+    .vp-estado-tarjeta { position: static; }
+}
