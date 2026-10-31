@@ -93,24 +93,37 @@ public function obtenerInventarioCompleto($filtros = [])
      * Registra un nuevo modelo base en el catálogo técnico (moto)
      */
     public function registrarVehiculo($datos)
-{
-    // Solo insertamos los campos reales que existen en la tabla 'moto'
-    $sql = "INSERT INTO moto (marca_id, proveedor_id, categoria_id, modelo, anio, cilindraje) 
-            VALUES (:marca_id, :proveedor_id, :categoria_id, :modelo, :anio, :cilindraje)";
-    
-    $stmt = $this->db->prepare($sql);
-    return $stmt->execute([
-        ':marca_id'     => $datos['marca_id'],
-        ':proveedor_id' => $datos['proveedor'], // El formulario envía 'proveedor', se mapea a 'proveedor_id'
-        ':categoria_id' => $datos['categoria_id'],
-        ':modelo'       => $datos['modelo'],
-        ':anio'         => $datos['anio'],
-        ':cilindraje'   => $datos['cilindraje']
-    ]);
-}
+    {
+        $stmtMarca = $this->db->prepare("SELECT nombre FROM marca WHERE marca_id = :marca_id");
+        $stmtMarca->execute([':marca_id' => $datos['marca_id']]);
+        $nombreMarca = $stmtMarca->fetchColumn();
 
+        if ($nombreMarca === false) {
+            return false; 
+        }
 
+        // moto.propulsion es ENUM('combustion','electrica'); el controlador envía 'gasolina'
+        $propulsion = ($datos['propulsion'] === 'electrica') ? 'electrica' : 'combustion';
 
+        $sql = "INSERT INTO moto
+                    (marca_id, marca, proveedor_id, categoria_id, modelo, anio, cilindraje, precio, propulsion, gama)
+                VALUES
+                    (:marca_id, :marca, :proveedor_id, :categoria_id, :modelo, :anio, :cilindraje, :precio, :propulsion, :gama)";
+
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([
+            ':marca_id'     => $datos['marca_id'],
+            ':marca'        => $nombreMarca,
+            ':proveedor_id' => $datos['proveedor'],
+            ':categoria_id' => $datos['categoria_id'],
+            ':modelo'       => $datos['modelo'],
+            ':anio'         => $datos['anio'],
+            ':cilindraje'   => $datos['cilindraje'],
+            ':precio'       => $datos['precio'],
+            ':propulsion'   => $propulsion,
+            ':gama'         => $datos['gama_cilindraje']
+        ]);
+    }
 
         /**
      * Obtiene todos los modelos puros del catálogo base sin depender del stock físico
