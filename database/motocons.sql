@@ -475,20 +475,3 @@ INSERT INTO unidad_moto (moto_id, chasis, motor, placa, color, estado) VALUES
     ((SELECT id FROM moto WHERE modelo = 'Avanti Pro'),   '9sbel123x45678901', 'em1000w2600123', NULL, 'NEGRO',  'disponible'),
     ((SELECT id FROM moto WHERE modelo = 'Avanti Pro'),   '9sbel123x45678902', 'em1000w2600124', NULL, 'AZUL',   'disponible'),
     ((SELECT id FROM moto WHERE modelo = 'TC MAX'),       '9sbtcmax0h0012345', '16zw7245312ya',  NULL, 'NEGRO',  'disponible');
-
--- Vista con los nombres del código viejo (producto_moto) para consultas SELECT.
--- Solo lectura: para insertar o editar motos usa la tabla moto.
--- Muestra solo las motos del inventario (las que tienen proveedor).
-CREATE OR REPLACE VIEW producto_moto AS
-SELECT id AS moto_id,
-       marca_id,
-       proveedor_id AS proveedor,
-       categoria_id,
-       modelo,
-       precio,
-       anio,
-       cilindraje,
-       CASE propulsion WHEN 'combustion' THEN 'gasolina' ELSE propulsion END AS propulsion,
-       gama AS gama_cilindraje
-FROM moto
-WHERE proveedor_id IS NOT NULL;

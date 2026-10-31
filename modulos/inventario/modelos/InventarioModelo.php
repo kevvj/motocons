@@ -129,10 +129,15 @@ public function obtenerInventarioCompleto($filtros = [])
      */
     public function obtenerCatalogoBaseCompleto()
     {
-        $sql = "SELECT pm.*, ma.nombre AS nombre_marca
-                FROM producto_moto pm
-                LEFT JOIN marca ma ON pm.marca_id = ma.marca_id
-                ORDER BY pm.modelo ASC";
+        // Solo las motos del inventario (las que tienen proveedor)
+        $sql = "SELECT m.id AS moto_id, m.marca_id, m.proveedor_id AS proveedor, m.categoria_id,
+                       m.modelo, m.precio, m.anio, m.cilindraje,
+                       CASE m.propulsion WHEN 'combustion' THEN 'gasolina' ELSE m.propulsion END AS propulsion,
+                       m.gama AS gama_cilindraje, ma.nombre AS nombre_marca
+                FROM moto m
+                LEFT JOIN marca ma ON m.marca_id = ma.marca_id
+                WHERE m.proveedor_id IS NOT NULL
+                ORDER BY m.modelo ASC";
 
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
