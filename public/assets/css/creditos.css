@@ -1,0 +1,64 @@
+/* Estilos propios del módulo créditos. Se apoya en estilos.css (tarjeta, btn, campo, alerta, tabla). */
+
+.creditos-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+.creditos-kpis { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 1.5rem; }
+.creditos-kpi { display: flex; flex-direction: column; gap: 0.3rem; text-align: center; }
+.creditos-kpi-numero { font-size: 1.75rem; font-weight: 800; color: var(--color-oscuro); }
+.creditos-kpi-etiqueta { font-size: 0.8rem; color: var(--color-texto-suave); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.creditos-filtro { margin-bottom: 1rem; max-width: 260px; }
+.creditos-filtro-campo { margin-bottom: 0; }
+
+.creditos-tabla { overflow-x: auto; }
+
+/* Insignia de estado: reusa los colores semánticos de las alertas. */
+.creditos-estado { display: inline-block; padding: 0.2rem 0.65rem; border-radius: var(--radio-boton); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+.creditos-estado-borrador,
+.creditos-estado-pendiente { background: var(--color-fondo-suave); color: var(--color-texto-suave); }
+.creditos-estado-en_proceso_credito { background: #fff6e6; color: var(--color-aviso); }
+.creditos-estado-aprobada,
+.creditos-estado-validado { background: #eaf6ef; color: var(--color-exito); }
+.creditos-estado-rechazada,
+.creditos-estado-rechazado { background: #fdeeee; color: var(--color-error); }
+.creditos-estado-anulada { background: var(--color-fondo-suave); color: var(--color-texto-suave); text-decoration: line-through; }
+
+.creditos-buscador, .creditos-form { max-width: 520px; margin-bottom: 1.5rem; }
+.creditos-nota { color: var(--color-texto-suave); font-size: 0.9rem; }
+
+.creditos-datos { display: grid; grid-template-columns: auto 1fr; gap: 0.35rem 1rem; margin: 0.75rem 0 0; }
+.creditos-datos dt { color: var(--color-texto-suave); font-size: 0.85rem; }
+.creditos-datos dd { margin: 0; }
+
+.creditos-resumen-solicitud { margin-bottom: 1.5rem; }
+
+.creditos-checklist { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+.creditos-requisito { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.creditos-requisito-info { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; flex: 1; min-width: 220px; }
+.creditos-opcional { font-size: 0.78rem; color: var(--color-texto-suave); font-style: italic; }
+.creditos-validador { font-size: 0.8rem; color: var(--color-texto-suave); }
+
+.creditos-adjuntar { display: flex; align-items: center; gap: 0.5rem; }
+.creditos-adjuntar input[type="file"] { font-size: 0.85rem; }
+
+.creditos-evaluar { display: flex; gap: 0.5rem; }
+
+.creditos-acciones-finales { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+
+@media (max-width: 640px) {
+    .creditos-requisito { flex-direction: column; align-items: stretch; }
+    .creditos-evaluar, .creditos-acciones-finales { flex-direction: column; }
+}
+
+/* ---------- Barra de progreso del checklist (porcentajeAvance del dominio) ---------- */
+.creditos-barra { position: relative; width: 100%; height: 8px; background: var(--color-fondo-suave); border-radius: var(--radio-boton); overflow: hidden; }
+.creditos-barra-relleno { position: absolute; inset: 0 auto 0 0; height: 100%; background: var(--color-primario); transition: width var(--transicion); }
+.creditos-barra-chica { width: 90px; }
+.creditos-barra-grande { height: 10px; margin-top: 0.75rem; }
+.creditos-barra-texto { margin: 0.25rem 0 0; font-size: 0.8rem; color: var(--color-texto-suave); }
+
+/* ---------- Previsualización del checklist al radicar ---------- */
+.creditos-preview-checklist { max-width: 520px; margin-bottom: 1.5rem; }
+.creditos-preview-lista { margin: 0.5rem 0 0.75rem; padding-left: 1.1rem; }
+.creditos-preview-lista li { margin-bottom: 0.4rem; }
+.creditos-preview-lista .creditos-opcional { margin-left: 0.4rem; }
