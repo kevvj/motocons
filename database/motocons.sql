@@ -299,6 +299,65 @@ INSERT INTO promocion_aplica (promocion_id, criterio, valor) VALUES
 
 
 
+
+-- =====================  MÓDULO: ventas_presenciales  =====================
+-- Grupo: <Miguel Martínez, Luis Galarcio, Juan Vargas, Santiago Hernandez > · Fecha: 2026-10-30
+-- Usa tablas de otros módulos: usuario (login), cliente, moto, venta, vehiculo, mantenimiento (garantia)
+-- Modifica tabla: venta (factura opcional, vendedor y estado). Crea tabla: detalle_venta.
+-- El ALTER TABLE venta va solo aquí: financiación no lo repite y su sección va debajo de esta.
+
+-- Usuario de prueba del punto de venta: vendedor@motocons.com / vendedor123
+INSERT INTO usuario (nombre, correo, clave, rol) VALUES
+    ('Vendedor de prueba', 'vendedor@motocons.com', '$2y$10$2e4PQPEV0sAeJYgvirAGaupSV7Btf.JqZnjXWcGlpoFQUHCYWkEva', 'vendedor');
+
+-- 1) Cambios a la tabla venta:
+--    - numero_factura pasa a opcional: se asigna cuando la venta queda PAGADA.
+--      Sigue siendo UNIQUE (se permiten varias filas con NULL).
+--    - usuario_id: vendedor que hizo la venta (para comisiones).
+--    - estado: ciclo de vida de la venta, acordado con financiación.
+ALTER TABLE venta
+    MODIFY COLUMN numero_factura VARCHAR(30) NULL,
+    ADD COLUMN usuario_id INT NULL AFTER cliente_id,
+    ADD COLUMN estado ENUM('PENDIENTE', 'EN_CREDITO', 'PAGADA', 'ENTREGADA', 'CERRADA', 'ANULADA')
+        NOT NULL DEFAULT 'PENDIENTE' AFTER total,
+    ADD CONSTRAINT fk_venta_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id);
+
+-- Las ventas de prueba de garantía ya tienen factura y la moto entregada.
+UPDATE venta SET estado = 'ENTREGADA' WHERE numero_factura IS NOT NULL;
+
+-- 2) Motos de cada venta. Mientras la venta no esté pagada solo viven aquí;
+--    al pasar a PAGADA se crean en vehiculo y se guarda vehiculo_id.
+--    chasis y placa no son UNIQUE aquí para que una venta ANULADA no bloquee
+--    esa moto: la repetición se valida en el modelo y vehiculo sí es UNIQUE.
+CREATE TABLE detalle_venta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    venta_id INT NOT NULL,
+    moto_id INT NOT NULL,
+    chasis VARCHAR(30) NOT NULL,
+    placa VARCHAR(10),
+    precio DECIMAL(12, 2) NOT NULL,           -- moto.precio al momento de la venta
+    vehiculo_id INT NULL UNIQUE,              -- se llena cuando la venta queda PAGADA
+    INDEX idx_detalle_venta_chasis (chasis),
+    FOREIGN KEY (venta_id) REFERENCES venta (id) ON DELETE CASCADE,
+    FOREIGN KEY (moto_id) REFERENCES moto (id),
+    FOREIGN KEY (vehiculo_id) REFERENCES vehiculo (id)
+) ENGINE=InnoDB;
+
+-- Detalle de las ventas de prueba que ya existen (sale de sus vehiculo).
+INSERT INTO detalle_venta (venta_id, moto_id, chasis, placa, precio, vehiculo_id)
+SELECT v.venta_id, v.moto_id, v.chasis, v.placa, m.precio, v.id
+FROM vehiculo v
+JOIN moto m ON m.id = v.moto_id;
+
+-- Datos de prueba del módulo: una venta de contado sin pagar y una en revisión de crédito.
+INSERT INTO venta (numero_factura, fecha, cliente_id, usuario_id, canal, total, estado) VALUES
+    (NULL, DATE_SUB(CURDATE(), INTERVAL 1 DAY), 2, (SELECT id FROM usuario WHERE correo = 'vendedor@motocons.com'), 'tienda', 7800000, 'PENDIENTE'),
+    (NULL, CURDATE(), 3, (SELECT id FROM usuario WHERE correo = 'vendedor@motocons.com'), 'tienda', 14900000, 'EN_CREDITO');
+
+INSERT INTO detalle_venta (venta_id, moto_id, chasis, placa, precio) VALUES
+    ((SELECT id FROM venta WHERE cliente_id = 2 AND estado = 'PENDIENTE'), 3, '9C2JC6810N0011223', NULL, 7800000),
+    ((SELECT id FROM venta WHERE cliente_id = 3 AND estado = 'EN_CREDITO'), 2, 'LXYPCKL06R0007788', NULL, 14900000);
+
 -- =====================  MÓDULO: inventario  =====================
 -- Grupo: Raul Correa, Luis Castro, Dana hernandez, Danna Banda, Mateo Martinez, Angel romero · Fecha: 2026-10-30
 -- Usa tablas de otros módulos: moto (garantia), vehiculo (garantia)
@@ -398,9 +457,6 @@ CREATE TABLE unidad_moto (
     vehiculo_id INT NULL UNIQUE,              -- se llena cuando la unidad se vende
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (moto_id) REFERENCES moto (id),
-    FOREIGN KEY (vehiculo_id) REFERENCES vehiculo (id)
-) ENGINE=InnoDB;
 
 INSERT INTO unidad_moto (moto_id, chasis, motor, placa, color, estado) VALUES
     ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0001',     'mt-fz150-0001',  NULL, 'AZUL',   'disponible'),
@@ -484,3 +540,4 @@ CREATE TRIGGER bu_unidad_moto_normalizar_textos BEFORE UPDATE ON unidad_moto FOR
 END
 $$
 DELIMITER ;
+
