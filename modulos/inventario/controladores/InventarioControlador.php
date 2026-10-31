@@ -44,23 +44,40 @@ class InventarioControlador extends Controlador
      */
     public function guardarmodelo(): void
     {
+        $this->requiereLogin();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $modelo = $this->modelo('InventarioModelo');
 
-            $cilindraje = isset($_POST['cilindraje']) ? intval($_POST['cilindraje']) : 0;
-            
+            $cilindraje = isset($_POST['cilindraje'])
+                ? intval($_POST['cilindraje'])
+                : 0;
+
             $gama = ($cilindraje >= 150) ? 'media' : 'baja';
-            if ($cilindraje >= 400) { $gama = 'alta'; }
+
+            if ($cilindraje >= 400) {
+                $gama = 'alta';
+            }
+
+            $esElectrica = isset($_POST['electrica']);
 
             $datos = [
                 'marca_id'        => isset($_POST['marca_id']) ? intval($_POST['marca_id']) : 0,
                 'proveedor'       => isset($_POST['distribuidor_id']) ? intval($_POST['distribuidor_id']) : 3,
-                'categoria_id'    => isset($_POST['electrica']) ? 1 : 2, 
-                'modelo'          => isset($_POST['modelo']) ? trim($_POST['modelo']) : '',
-                'precio'          => isset($_POST['precio_venta']) ? floatval($_POST['precio_venta']) : 0,
+                'categoria_id'    => $esElectrica ? 4 : (
+                    $gama === 'baja' ? 1 : (
+                        $gama === 'media' ? 2 : 3
+                    )
+                ),
+                'modelo'          => isset($_POST['modelo'])
+                    ? mb_strtoupper(trim($_POST['modelo']), 'UTF-8')
+                    : '',
+                'precio'          => isset($_POST['precio_venta'])
+                    ? floatval($_POST['precio_venta'])
+                    : 0,
                 'anio'            => isset($_POST['anio']) ? intval($_POST['anio']) : 2026,
                 'cilindraje'      => $cilindraje,
-                'propulsion'      => isset($_POST['electrica']) ? 'electrica' : 'gasolina',
+                'propulsion'      => $esElectrica ? 'electrica' : 'gasolina',
                 'gama_cilindraje' => $gama
             ];
 
@@ -78,6 +95,8 @@ class InventarioControlador extends Controlador
      */
      public function guardaringreso(): void
 {
+        $this->requiereLogin();
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $modelo = $this->modelo('InventarioModelo');
 
@@ -85,8 +104,8 @@ class InventarioControlador extends Controlador
         $datos = [
             // CORREGIDO: Ahora lee 'moto_id' tal como lo definiste en el <select name="moto_id">
             'moto_id' => isset($_POST['moto_id']) ? intval($_POST['moto_id']) : 0,
-            'chasis'  => isset($_POST['chasis']) ? trim(strtoupper($_POST['chasis'])) : '',
-            'motor'   => isset($_POST['motor']) ? trim(strtoupper($_POST['motor'])) : '',
+            'chasis'  => isset($_POST['chasis']) ? trim(strtolower($_POST['chasis'])) : '',
+            'motor'   => isset($_POST['motor']) ? trim(strtolower($_POST['motor'])) : '',
             'color'   => isset($_POST['color']) ? trim(strtoupper($_POST['color'])) : '',
             'estado'  => 'disponible' 
         ];
@@ -106,14 +125,16 @@ class InventarioControlador extends Controlador
      */
     public function guardarproveedor(): void
     {
+        $this->requiereLogin();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $modelo = $this->modelo('InventarioModelo');
 
             $datos = [
-                'nombre'   => isset($_POST['nombre']) ? trim($_POST['nombre']) : '',
-                'nit'      => isset($_POST['nit']) ? trim($_POST['nit']) : '',
-                'telefono' => isset($_POST['telefono']) ? trim($_POST['telefono']) : '',
-                'correo'   => isset($_POST['correo']) ? trim($_POST['correo']) : '',
+                'nombre'   => isset($_POST['nombre']) ? mb_strtoupper(trim($_POST['nombre']), 'UTF-8') : '',
+                'nit'      => isset($_POST['nit']) ? strtolower(trim($_POST['nit'])) : '',
+                'telefono' => isset($_POST['telefono']) ? strtolower(trim($_POST['telefono'])) : '',
+                'correo'   => isset($_POST['correo']) ? strtolower(trim($_POST['correo'])) : '',
                 'activo'   => 1
             ];
 
@@ -131,6 +152,8 @@ class InventarioControlador extends Controlador
      */
     public function guardarmarca(): void
     {
+        $this->requiereLogin();
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $modelo = $this->modelo('InventarioModelo');
             

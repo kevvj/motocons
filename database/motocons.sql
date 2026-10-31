@@ -439,8 +439,8 @@ INSERT INTO moto (marca_id, proveedor_id, categoria_id, marca, modelo, propulsio
     (5, 6, 1, 'AKT',        'CR4 125',      'combustion', 'baja',   6200000.00, 2026, 125),
     (1, 3, 2, 'Yamaha',     'NMAX 155',     'combustion', 'media', 16500000.00, 2026, 155),
     (3, 4, 2, 'Suzuki',     'Gixxer FI',    'combustion', 'media', 11500000.00, 2026, 155),
-    (6, 8, 1, 'Starker',    'Avanti Pro',   'electrica',  'baja',   6990000.00, 2026, 0),
-    (7, 9, 1, 'Super Soco', 'TC MAX',       'electrica',  'baja',  12999135.00, 2026, 0);
+    (6, 8, 4, 'Starker',    'Avanti Pro', 'electrica', 'baja',  6990000.00, 2026, 0),
+    (7, 9, 4, 'Super Soco', 'TC MAX',     'electrica', 'baja', 12999135.00, 2026, 0);
 
 -- 4) Unidades físicas en bodega. Al venderse, ventas crea el vehiculo
 --    y se guarda aquí su vehiculo_id con estado 'vendida'.
@@ -479,7 +479,7 @@ INSERT INTO unidad_moto (moto_id, chasis, motor, placa, color, estado) VALUES
 -- Vista con los nombres del código viejo (producto_moto) para consultas SELECT.
 -- Solo lectura: para insertar o editar motos usa la tabla moto.
 -- Muestra solo las motos del inventario (las que tienen proveedor).
-CREATE VIEW producto_moto AS
+CREATE OR REPLACE VIEW producto_moto AS
 SELECT id AS moto_id,
        marca_id,
        proveedor_id AS proveedor,
@@ -492,52 +492,3 @@ SELECT id AS moto_id,
        gama AS gama_cilindraje
 FROM moto
 WHERE proveedor_id IS NOT NULL;
-
--- 5) Triggers de normalización de texto (los mismos de inventariodb.sql).
---    Si tu cliente no soporta DELIMITER, bórralos: los datos de arriba ya vienen normalizados.
-DELIMITER $$
-CREATE TRIGGER bi_categoria_normalizar_texto BEFORE INSERT ON categoria FOR EACH ROW BEGIN
-    SET NEW.nombre = LOWER(NEW.nombre);
-END
-$$
-CREATE TRIGGER bu_categoria_normalizar_texto BEFORE UPDATE ON categoria FOR EACH ROW BEGIN
-    SET NEW.nombre = LOWER(NEW.nombre);
-END
-$$
-CREATE TRIGGER bi_marca_normalizar_texto BEFORE INSERT ON marca FOR EACH ROW BEGIN
-    SET NEW.nombre = UPPER(NEW.nombre);
-END
-$$
-CREATE TRIGGER bu_marca_normalizar_texto BEFORE UPDATE ON marca FOR EACH ROW BEGIN
-    SET NEW.nombre = UPPER(NEW.nombre);
-END
-$$
-CREATE TRIGGER bi_proveedor_normalizar_textos BEFORE INSERT ON proveedor FOR EACH ROW BEGIN
-    SET NEW.nombre = UPPER(NEW.nombre);
-    SET NEW.nit = LOWER(NEW.nit);
-    SET NEW.telefono = LOWER(NEW.telefono);
-    SET NEW.correo = LOWER(NEW.correo);
-END
-$$
-CREATE TRIGGER bu_proveedor_normalizar_textos BEFORE UPDATE ON proveedor FOR EACH ROW BEGIN
-    SET NEW.nombre = UPPER(NEW.nombre);
-    SET NEW.nit = LOWER(NEW.nit);
-    SET NEW.telefono = LOWER(NEW.telefono);
-    SET NEW.correo = LOWER(NEW.correo);
-END
-$$
-CREATE TRIGGER bi_unidad_moto_normalizar_textos BEFORE INSERT ON unidad_moto FOR EACH ROW BEGIN
-    SET NEW.chasis = LOWER(NEW.chasis);
-    SET NEW.motor = LOWER(NEW.motor);
-    SET NEW.placa = LOWER(NEW.placa);
-    SET NEW.color = UPPER(NEW.color);
-END
-$$
-CREATE TRIGGER bu_unidad_moto_normalizar_textos BEFORE UPDATE ON unidad_moto FOR EACH ROW BEGIN
-    SET NEW.chasis = LOWER(NEW.chasis);
-    SET NEW.motor = LOWER(NEW.motor);
-    SET NEW.placa = LOWER(NEW.placa);
-    SET NEW.color = UPPER(NEW.color);
-END
-$$
-DELIMITER ;
