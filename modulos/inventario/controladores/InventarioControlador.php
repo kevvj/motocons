@@ -5,7 +5,7 @@ class InventarioControlador extends Controlador
     // index.php?r=inventario/index
     public function index(): void
     {
-        $this->requiereLogin();
+        $this->requiereLogin(['admin', 'vendedor']);
         
         $modelo = $this->modelo('InventarioModelo');
         $tab = $_GET['tab'] ?? 'stock';
@@ -44,7 +44,7 @@ class InventarioControlador extends Controlador
      */
     public function guardarmodelo(): void
     {
-        $this->requiereLogin();
+        $this->requiereLogin(['admin', 'vendedor']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $modelo = $this->modelo('InventarioModelo');
@@ -95,7 +95,7 @@ class InventarioControlador extends Controlador
      */
      public function guardaringreso(): void
 {
-        $this->requiereLogin();
+        $this->requiereLogin(['admin', 'vendedor']);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $modelo = $this->modelo('InventarioModelo');
@@ -125,7 +125,7 @@ class InventarioControlador extends Controlador
      */
     public function guardarproveedor(): void
     {
-        $this->requiereLogin();
+        $this->requiereLogin(['admin', 'vendedor']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $modelo = $this->modelo('InventarioModelo');
@@ -152,7 +152,7 @@ class InventarioControlador extends Controlador
      */
     public function guardarmarca(): void
     {
-        $this->requiereLogin();
+        $this->requiereLogin(['admin', 'vendedor']);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $modelo = $this->modelo('InventarioModelo');
