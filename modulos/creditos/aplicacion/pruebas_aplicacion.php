@@ -3,7 +3,13 @@
 // Sin PHPUnit, mismo formato que dominio/pruebas_dominio.php.
 //
 // Requiere: config/config.php apuntando a una base con el esquema de database/motocons.sql
-// ya importado (los 4 clientes/ventas/vehículos de prueba deben existir).
+// ya importado (clientes y motos de garantía deben existir: cliente 1-3, moto 1-3).
+//
+// Las ventas que usa cada prueba se crean aquí mismo (PENDIENTE/EN_CREDITO), en vez de
+// depender de IDs fijos de otros módulos: desde que ventas_presenciales agregó venta.estado,
+// las ventas de garantía (1-4) quedaron ENTREGADA y ya no sirven para radicar un crédito
+// (ver ADR-014). Cada corrida inserta ventas nuevas; no hace falta limpiarlas entre corridas,
+// pero si se quiere una base liviana, reimportar database/motocons.sql.
 //
 // Uso: php -d extension=pdo_mysql.so modulos/creditos/aplicacion/pruebas_aplicacion.php
 
@@ -80,6 +86,32 @@ function esperarCodigo(string $codigoEsperado, callable $cuerpo, string $mensaje
     throw new RuntimeException($mensaje . ' — debía lanzar CreditosExcepcion y no lanzó nada');
 }
 
+// Venta de prueba propia del módulo créditos: no depende de los datos de otros grupos,
+// que pueden cambiar (ver ADR-014). Nace sin factura ni vehículo, como una venta real
+// recién creada por ventas_presenciales.
+function crearVenta(int $clienteId, float $total, string $estado = 'PENDIENTE'): int
+{
+    $db = Database::conexion();
+    $db->prepare(
+        "INSERT INTO venta (numero_factura, fecha, cliente_id, canal, total, estado)
+         VALUES (NULL, CURDATE(), ?, 'tienda', ?, ?)"
+    )->execute([$clienteId, $total, $estado]);
+
+    return (int) $db->lastInsertId();
+}
+
+// Solo para el caso (hoy poco común, pero posible) de una venta que ya tiene su unidad
+// en `vehiculo` antes de radicar el crédito.
+function crearVehiculo(int $ventaId, int $clienteId, int $motoId, string $chasis): int
+{
+    $db = Database::conexion();
+    $db->prepare(
+        'INSERT INTO vehiculo (chasis, moto_id, cliente_id, venta_id) VALUES (?, ?, ?, ?)'
+    )->execute([$chasis, $motoId, $clienteId, $ventaId]);
+
+    return (int) $db->lastInsertId();
+}
+
 limpiarTablasPropias();
 
 $solicitudes = new CreditosSolicitudModelo();
@@ -133,13 +165,15 @@ prueba('Listar: el medio de pago en minúsculas también funciona', function () 
 // CreditosRadicarSolicitud
 // ===========================================================================
 
-prueba('Radicar: crea la solicitud y copia el checklist BRILLA completo', function () use ($radicar, $solicitudes, $checklist): void {
-    $id = $radicar->ejecutar(1, 1, 'BRILLA', 15000000, ADMIN_ID);
+$vBrilla = crearVenta(1, 15000000);
+
+prueba('Radicar: crea la solicitud y copia el checklist BRILLA completo', function () use ($radicar, $solicitudes, $checklist, $vBrilla): void {
+    $id = $radicar->ejecutar($vBrilla, null, 'BRILLA', 15000000, ADMIN_ID);
     esperar($id > 0, 'Debía devolver un id positivo');
 
     $fila = $solicitudes->buscarPorId($id);
     esperarIgual(CreditosSolicitudModelo::ESTADO_EN_PROCESO_CREDITO, $fila['estado'], 'Nace EN_PROCESO_CREDITO');
-    esperarIgual(1, (int) $fila['venta_id'], 'Debía apuntar a la venta 1');
+    esperarIgual($vBrilla, (int) $fila['venta_id'], 'Debía apuntar a la venta creada para esta prueba');
 
     $filasChecklist = $checklist->listarPorSolicitud($id);
     esperarIgual(3, count($filasChecklist), 'El checklist de BRILLA debía copiar 3 requisitos');
@@ -148,44 +182,64 @@ prueba('Radicar: crea la solicitud y copia el checklist BRILLA completo', functi
     }
 });
 
-prueba('Radicar: una segunda solicitud sobre la misma venta se rechaza', function () use ($radicar): void {
-    // La venta 1 ya tiene solicitud por la prueba anterior.
-    esperarCodigo('SOLICITUD_DUPLICADA', function () use ($radicar): void {
-        $radicar->ejecutar(1, 1, 'BRILLA', 1000000, ADMIN_ID);
-    }, 'Radicar dos veces sobre la venta 1');
+prueba('Radicar: una segunda solicitud sobre la misma venta se rechaza', function () use ($radicar, $vBrilla): void {
+    esperarCodigo('SOLICITUD_DUPLICADA', function () use ($radicar, $vBrilla): void {
+        $radicar->ejecutar($vBrilla, null, 'BRILLA', 1000000, ADMIN_ID);
+    }, 'Radicar dos veces sobre la misma venta');
 });
 
 prueba('Radicar: venta inexistente se rechaza', function () use ($radicar): void {
     esperarCodigo('VENTA_NO_EXISTE', function () use ($radicar): void {
-        $radicar->ejecutar(999, null, 'BRILLA', 1000000, ADMIN_ID);
-    }, 'Radicar sobre la venta 999');
+        $radicar->ejecutar(999999, null, 'BRILLA', 1000000, ADMIN_ID);
+    }, 'Radicar sobre una venta que no existe');
 });
 
 prueba('Radicar: medio de pago inválido se rechaza', function () use ($radicar): void {
-    esperarCodigo('MEDIO_PAGO_INVALIDO', function () use ($radicar): void {
-        $radicar->ejecutar(3, null, 'OTRO', 1000000, ADMIN_ID);
-    }, 'Radicar con medioPago=OTRO sobre la venta 3');
+    $venta = crearVenta(1, 1000000);
+    esperarCodigo('MEDIO_PAGO_INVALIDO', function () use ($radicar, $venta): void {
+        $radicar->ejecutar($venta, null, 'OTRO', 1000000, ADMIN_ID);
+    }, 'Radicar con medioPago=OTRO');
 });
 
 prueba('Radicar: el vehículo debe pertenecer a la venta indicada', function () use ($radicar): void {
-    // El vehículo 1 es de la venta 1, no de la venta 2.
-    esperarCodigo('VEHICULO_NO_PERTENECE', function () use ($radicar): void {
-        $radicar->ejecutar(2, 1, 'SERVICREDITO', 1000000, ADMIN_ID);
-    }, 'Radicar la venta 2 con el vehículo de la venta 1');
+    // vehiculo 1 es de la venta 1 de garantía (otra venta, no esta).
+    $venta = crearVenta(2, 1000000);
+    esperarCodigo('VEHICULO_NO_PERTENECE', function () use ($radicar, $venta): void {
+        $radicar->ejecutar($venta, 1, 'SERVICREDITO', 1000000, ADMIN_ID);
+    }, 'Radicar con el vehículo de otra venta');
 });
 
-prueba('Radicar: SERVICREDITO con su propio vehículo queda correcto', function () use ($radicar, $checklist): void {
-    $id = $radicar->ejecutar(2, 2, 'SERVICREDITO', 8000000, ADMIN_ID);
-    esperarIgual(3, count($checklist->listarPorSolicitud($id)), 'El checklist de SERVICREDITO debía copiar 3 requisitos');
+prueba('Radicar: una venta ya ENTREGADA (resuelta) no se puede financiar', function () use ($radicar): void {
+    // Venta 1 real: es de garantía, ya tiene factura, el merge de ventas_presenciales
+    // la dejó en ENTREGADA. No tiene solicitud_credito (las pruebas usan ventas propias).
+    esperarCodigo('VENTA_NO_FINANCIABLE', function () use ($radicar): void {
+        $radicar->ejecutar(1, 1, 'BRILLA', 1000000, ADMIN_ID);
+    }, 'Radicar sobre una venta ENTREGADA');
+});
+
+prueba('Radicar: una venta EN_CREDITO también se puede financiar', function () use ($radicar, $checklist): void {
+    $venta = crearVenta(3, 14900000, 'EN_CREDITO');
+    $id = $radicar->ejecutar($venta, null, 'SERVICREDITO', 14900000, ADMIN_ID);
+    esperarIgual(3, count($checklist->listarPorSolicitud($id)), 'Debía copiar el checklist igual que cualquier otra');
+});
+
+prueba('Radicar: con un vehículo que ya existe para esa venta, lo asocia', function () use ($radicar, $solicitudes): void {
+    $venta    = crearVenta(2, 8000000);
+    $vehiculo = crearVehiculo($venta, 2, 2, 'CHASIS-PRUEBA-' . uniqid());
+
+    $id  = $radicar->ejecutar($venta, $vehiculo, 'SERVICREDITO', 8000000, ADMIN_ID);
+    $fila = $solicitudes->buscarPorId($id);
+
+    esperarIgual($vehiculo, (int) $fila['vehiculo_id'], 'Debía guardar el vehículo indicado');
 });
 
 // ===========================================================================
 // CreditosAdjuntarSoporte / CreditosEvaluarRequisito
-// (usan la solicitud BRILLA de la venta 1, radicada arriba)
+// (reusan la solicitud BRILLA de $vBrilla, radicada arriba)
 // ===========================================================================
 
-prueba('Evaluar: marca VALIDADO y guarda quién validó', function () use ($solicitudes, $evaluar, $checklist): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Evaluar: marca VALIDADO y guarda quién validó', function () use ($solicitudes, $evaluar, $checklist, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     $evaluar->ejecutar($solicitudId, REQ_CEDULA_BRILLA, 'VALIDADO', ADMIN_ID);
 
@@ -194,8 +248,8 @@ prueba('Evaluar: marca VALIDADO y guarda quién validó', function () use ($soli
     esperarIgual(ADMIN_ID, (int) $fila['validado_por'], 'Debía guardar quién validó');
 });
 
-prueba('Evaluar: marca RECHAZADO', function () use ($solicitudes, $evaluar, $checklist): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Evaluar: marca RECHAZADO', function () use ($solicitudes, $evaluar, $checklist, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     $evaluar->ejecutar($solicitudId, REQ_REFERENCIAS_BRILLA, 'RECHAZADO', ADMIN_ID);
 
@@ -203,16 +257,16 @@ prueba('Evaluar: marca RECHAZADO', function () use ($solicitudes, $evaluar, $che
     esperarIgual('RECHAZADO', $fila['estado'], 'Debía quedar RECHAZADO');
 });
 
-prueba('Evaluar: un estado que no es VALIDADO ni RECHAZADO se rechaza', function () use ($solicitudes, $evaluar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Evaluar: un estado que no es VALIDADO ni RECHAZADO se rechaza', function () use ($solicitudes, $evaluar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     esperarCodigo('ESTADO_INVALIDO', function () use ($evaluar, $solicitudId): void {
         $evaluar->ejecutar($solicitudId, REQ_GAS, 'APROBADO', ADMIN_ID);
     }, 'Evaluar con estado=APROBADO');
 });
 
-prueba('Evaluar: un requisito que no es del checklist de esa solicitud se rechaza', function () use ($solicitudes, $evaluar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id']; // es BRILLA
+prueba('Evaluar: un requisito que no es del checklist de esa solicitud se rechaza', function () use ($solicitudes, $evaluar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id']; // es BRILLA
 
     esperarCodigo('REQUISITO_NO_EXISTE', function () use ($evaluar, $solicitudId): void {
         $evaluar->ejecutar($solicitudId, REQ_NOMINA_SERVICREDITO, 'VALIDADO', ADMIN_ID);
@@ -221,12 +275,12 @@ prueba('Evaluar: un requisito que no es del checklist de esa solicitud se rechaz
 
 prueba('Evaluar: una solicitud inexistente se rechaza', function () use ($evaluar): void {
     esperarCodigo('SOLICITUD_NO_EXISTE', function () use ($evaluar): void {
-        $evaluar->ejecutar(999, REQ_GAS, 'VALIDADO', ADMIN_ID);
-    }, 'Evaluar sobre la solicitud 999');
+        $evaluar->ejecutar(999999, REQ_GAS, 'VALIDADO', ADMIN_ID);
+    }, 'Evaluar sobre una solicitud que no existe');
 });
 
-prueba('Adjuntar: subir un soporte nuevo reinicia el estado a PENDIENTE', function () use ($solicitudes, $adjuntar, $evaluar, $checklist): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Adjuntar: subir un soporte nuevo reinicia el estado a PENDIENTE', function () use ($solicitudes, $adjuntar, $evaluar, $checklist, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
     // La cédula (REQ_CEDULA_BRILLA) quedó VALIDADO en la prueba de arriba.
 
     $adjuntar->ejecutar($solicitudId, REQ_CEDULA_BRILLA, 'soportes/cedula-nueva.pdf');
@@ -240,8 +294,8 @@ prueba('Adjuntar: subir un soporte nuevo reinicia el estado a PENDIENTE', functi
     $evaluar->ejecutar($solicitudId, REQ_CEDULA_BRILLA, 'VALIDADO', ADMIN_ID);
 });
 
-prueba('Adjuntar: un requisito fuera del checklist se rechaza', function () use ($solicitudes, $adjuntar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Adjuntar: un requisito fuera del checklist se rechaza', function () use ($solicitudes, $adjuntar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     esperarCodigo('REQUISITO_NO_EXISTE', function () use ($adjuntar, $solicitudId): void {
         $adjuntar->ejecutar($solicitudId, REQ_NOMINA_SERVICREDITO, 'soportes/x.pdf');
@@ -252,9 +306,9 @@ prueba('Adjuntar: un requisito fuera del checklist se rechaza', function () use 
 // CreditosAprobarCredito
 // ===========================================================================
 
-prueba('Aprobar: con el recibo de gas sin validar, lanza REQUISITO_GAS', function () use ($solicitudes, $aprobar): void {
-    // Venta 1: cédula VALIDADO, referencias RECHAZADO, gas PENDIENTE todavía.
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Aprobar: con el recibo de gas sin validar, lanza REQUISITO_GAS', function () use ($solicitudes, $aprobar, $vBrilla): void {
+    // Cédula VALIDADO, referencias RECHAZADO, gas PENDIENTE todavía.
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     esperarCodigo('REQUISITO_GAS', function () use ($aprobar, $solicitudId): void {
         $aprobar->ejecutar($solicitudId, ADMIN_ID);
@@ -264,8 +318,8 @@ prueba('Aprobar: con el recibo de gas sin validar, lanza REQUISITO_GAS', functio
     esperarIgual(CreditosSolicitudModelo::ESTADO_EN_PROCESO_CREDITO, $fila['estado'], 'No debía cambiar de estado al fallar');
 });
 
-prueba('Aprobar: con todos los obligatorios validados, queda APROBADA', function () use ($solicitudes, $evaluar, $aprobar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Aprobar: con todos los obligatorios validados, queda APROBADA', function () use ($solicitudes, $evaluar, $aprobar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     // Faltaban: gas PENDIENTE y referencias RECHAZADO (de la prueba de Evaluar de arriba).
     $evaluar->ejecutar($solicitudId, REQ_GAS, 'VALIDADO', ADMIN_ID);
@@ -277,24 +331,24 @@ prueba('Aprobar: con todos los obligatorios validados, queda APROBADA', function
     esperar($fila['aprobado_por'] !== null, 'Debía guardar quién aprobó');
 });
 
-prueba('Aprobar: una solicitud que ya no está EN_PROCESO_CREDITO se rechaza', function () use ($solicitudes, $aprobar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id']; // ya quedó APROBADA arriba
+prueba('Aprobar: una solicitud que ya no está EN_PROCESO_CREDITO se rechaza', function () use ($solicitudes, $aprobar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id']; // ya quedó APROBADA arriba
 
     esperarCodigo('SOLICITUD_NO_EDITABLE', function () use ($aprobar, $solicitudId): void {
         $aprobar->ejecutar($solicitudId, ADMIN_ID);
     }, 'Aprobar una solicitud ya APROBADA');
 });
 
-prueba('Adjuntar: sobre una solicitud ya APROBADA se rechaza', function () use ($solicitudes, $adjuntar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Adjuntar: sobre una solicitud ya APROBADA se rechaza', function () use ($solicitudes, $adjuntar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     esperarCodigo('SOLICITUD_NO_EDITABLE', function () use ($adjuntar, $solicitudId): void {
         $adjuntar->ejecutar($solicitudId, REQ_GAS, 'soportes/tarde.pdf');
     }, 'Adjuntar sobre una solicitud APROBADA');
 });
 
-prueba('Evaluar: sobre una solicitud ya APROBADA se rechaza', function () use ($solicitudes, $evaluar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id'];
+prueba('Evaluar: sobre una solicitud ya APROBADA se rechaza', function () use ($solicitudes, $evaluar, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id'];
 
     esperarCodigo('SOLICITUD_NO_EDITABLE', function () use ($evaluar, $solicitudId): void {
         $evaluar->ejecutar($solicitudId, REQ_GAS, 'VALIDADO', ADMIN_ID);
@@ -303,18 +357,21 @@ prueba('Evaluar: sobre una solicitud ya APROBADA se rechaza', function () use ($
 
 prueba('Aprobar: una solicitud inexistente se rechaza', function () use ($aprobar): void {
     esperarCodigo('SOLICITUD_NO_EXISTE', function () use ($aprobar): void {
-        $aprobar->ejecutar(999, ADMIN_ID);
-    }, 'Aprobar la solicitud 999');
+        $aprobar->ejecutar(999999, ADMIN_ID);
+    }, 'Aprobar una solicitud que no existe');
 });
 
-prueba('Aprobar: ServiCrédito aprueba con los obligatorios validados (el certificado opcional queda pendiente)', function () use ($solicitudes, $aprobar): void {
-    $solicitudId = $solicitudes->buscarPorVenta(2)['id'];
+prueba('Aprobar: ServiCrédito aprueba con los obligatorios validados (el certificado opcional queda pendiente)', function () use ($solicitudes): void {
+    $venta = crearVenta(2, 8000000);
+    $radicarLocal = new CreditosRadicarSolicitud($solicitudes, new CreditosSolicitudRequisitoModelo(), new CreditosRecursoModelo());
+    $solicitudId  = $radicarLocal->ejecutar($venta, null, 'SERVICREDITO', 8000000, ADMIN_ID);
 
     $evaluarLocal = new CreditosEvaluarRequisito($solicitudes, new CreditosSolicitudRequisitoModelo());
     $evaluarLocal->ejecutar($solicitudId, REQ_CEDULA_SERVICREDITO, 'VALIDADO', ADMIN_ID);
     $evaluarLocal->ejecutar($solicitudId, REQ_NOMINA_SERVICREDITO, 'VALIDADO', ADMIN_ID);
 
-    $fila = $aprobar->ejecutar($solicitudId, ADMIN_ID);
+    $aprobarLocal = new CreditosAprobarCredito($solicitudes, new CreditosSolicitudRequisitoModelo());
+    $fila = $aprobarLocal->ejecutar($solicitudId, ADMIN_ID);
     esperarIgual(CreditosSolicitudModelo::ESTADO_APROBADA, $fila['estado'], 'Debía quedar APROBADA (el certificado es opcional)');
 });
 
@@ -323,7 +380,8 @@ prueba('Aprobar: ServiCrédito aprueba con los obligatorios validados (el certif
 // ===========================================================================
 
 prueba('Rechazar: EN_PROCESO_CREDITO pasa a RECHAZADA', function () use ($radicar, $solicitudes): void {
-    $id = $radicar->ejecutar(3, 3, 'BRILLA', 9000000, ADMIN_ID);
+    $venta = crearVenta(3, 9000000);
+    $id = $radicar->ejecutar($venta, null, 'BRILLA', 9000000, ADMIN_ID);
     $rechazar = new CreditosRechazarCredito($solicitudes);
 
     $fila = $rechazar->ejecutar($id, ADMIN_ID);
@@ -331,12 +389,14 @@ prueba('Rechazar: EN_PROCESO_CREDITO pasa a RECHAZADA', function () use ($radica
     esperarIgual(CreditosSolicitudModelo::ESTADO_RECHAZADA, $fila['estado'], 'Debía quedar RECHAZADA');
 });
 
-prueba('Rechazar: una solicitud que ya no está EN_PROCESO_CREDITO se rechaza', function () use ($solicitudes): void {
-    $solicitudId = $solicitudes->buscarPorVenta(3)['id']; // ya quedó RECHAZADA arriba
+prueba('Rechazar: una solicitud que ya no está EN_PROCESO_CREDITO se rechaza', function () use ($solicitudes, $radicar): void {
+    $venta = crearVenta(3, 9000000);
+    $id = $radicar->ejecutar($venta, null, 'BRILLA', 9000000, ADMIN_ID);
     $rechazar = new CreditosRechazarCredito($solicitudes);
+    $rechazar->ejecutar($id, ADMIN_ID); // la deja RECHAZADA
 
-    esperarCodigo('SOLICITUD_NO_EDITABLE', function () use ($rechazar, $solicitudId): void {
-        $rechazar->ejecutar($solicitudId, ADMIN_ID);
+    esperarCodigo('SOLICITUD_NO_EDITABLE', function () use ($rechazar, $id): void {
+        $rechazar->ejecutar($id, ADMIN_ID);
     }, 'Rechazar una solicitud ya RECHAZADA');
 });
 
@@ -344,12 +404,13 @@ prueba('Rechazar: una solicitud inexistente se rechaza', function () use ($solic
     $rechazar = new CreditosRechazarCredito($solicitudes);
 
     esperarCodigo('SOLICITUD_NO_EXISTE', function () use ($rechazar): void {
-        $rechazar->ejecutar(999, ADMIN_ID);
-    }, 'Rechazar la solicitud 999');
+        $rechazar->ejecutar(999999, ADMIN_ID);
+    }, 'Rechazar una solicitud que no existe');
 });
 
 prueba('Anular: EN_PROCESO_CREDITO pasa a ANULADA', function () use ($radicar, $solicitudes): void {
-    $id = $radicar->ejecutar(4, 4, 'SERVICREDITO', 7000000, ADMIN_ID);
+    $venta = crearVenta(1, 7000000);
+    $id = $radicar->ejecutar($venta, null, 'SERVICREDITO', 7000000, ADMIN_ID);
     $anular = new CreditosAnularSolicitud($solicitudes);
 
     $fila = $anular->ejecutar($id);
@@ -357,8 +418,8 @@ prueba('Anular: EN_PROCESO_CREDITO pasa a ANULADA', function () use ($radicar, $
     esperarIgual(CreditosSolicitudModelo::ESTADO_ANULADA, $fila['estado'], 'Debía quedar ANULADA');
 });
 
-prueba('Anular: una solicitud que ya no es editable no se puede anular', function () use ($solicitudes): void {
-    $solicitudId = $solicitudes->buscarPorVenta(1)['id']; // quedó APROBADA en pruebas anteriores
+prueba('Anular: una solicitud que ya no es editable no se puede anular', function () use ($solicitudes, $vBrilla): void {
+    $solicitudId = $solicitudes->buscarPorVenta($vBrilla)['id']; // quedó APROBADA en pruebas anteriores
     $anular = new CreditosAnularSolicitud($solicitudes);
 
     esperarCodigo('SOLICITUD_NO_EDITABLE', function () use ($anular, $solicitudId): void {
@@ -370,8 +431,8 @@ prueba('Anular: una solicitud inexistente se rechaza', function () use ($solicit
     $anular = new CreditosAnularSolicitud($solicitudes);
 
     esperarCodigo('SOLICITUD_NO_EXISTE', function () use ($anular): void {
-        $anular->ejecutar(999);
-    }, 'Anular la solicitud 999');
+        $anular->ejecutar(999999);
+    }, 'Anular una solicitud que no existe');
 });
 
 // ===========================================================================

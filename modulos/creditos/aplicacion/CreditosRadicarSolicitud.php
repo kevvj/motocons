@@ -37,6 +37,12 @@ class CreditosRadicarSolicitud
         if ($venta === null) {
             throw new CreditosExcepcion("La venta {$ventaId} no existe.", 'VENTA_NO_EXISTE');
         }
+        if (! CreditosRecursoModelo::esFinanciable($venta['estado'])) {
+            throw new CreditosExcepcion(
+                "La venta {$ventaId} está en estado '{$venta['estado']}' y ya no admite una solicitud de crédito.",
+                'VENTA_NO_FINANCIABLE'
+            );
+        }
 
         if ($this->solicitudes->buscarPorVenta($ventaId) !== null) {
             $etiqueta = $venta['numero_factura'] ?? $ventaId;
