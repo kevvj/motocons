@@ -8,10 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/css/estilos.css">
+    <link rel="stylesheet" href="assets/css/estilos.css?v=<?= filemtime(RAIZ . '/public/assets/css/estilos.css') ?>">
     <?php // El CSS del módulo se carga solo si existe public/assets/css/<modulo>.css ?>
     <?php if (file_exists(RAIZ . '/public/assets/css/' . $this->modulo . '.css')): ?>
-        <link rel="stylesheet" href="assets/css/<?= $this->modulo ?>.css">
+        <link rel="stylesheet" href="assets/css/<?= $this->modulo ?>.css?v=<?= filemtime(RAIZ . '/public/assets/css/' . $this->modulo . '.css') ?>">
     <?php endif; ?>
 </head>
 <body>
