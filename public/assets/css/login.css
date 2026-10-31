@@ -2,3 +2,17 @@
 .login { display: flex; justify-content: center; align-items: center; min-height: 60vh; }
 .login-tarjeta { width: 100%; max-width: 400px; border-top: 4px solid var(--color-primario); padding: 2rem; }
 .login-subtitulo { margin: 0 0 1.5rem; color: var(--color-texto-suave); }
+.login-tarjeta-ancha { max-width: 520px; }
+.login-fila { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+.login-pie { margin: 1.25rem 0 0; text-align: center; font-size: 0.9rem; color: var(--color-texto-suave); }
+
+/* Gestión de usuarios */
+.login-usuarios { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
+.login-usuarios h2 { font-size: 1.15rem; }
+.login-tabla { overflow-x: auto; }
+.login-tabla form { margin: 0; }
+.login-inactivo { color: var(--color-error); font-weight: 600; }
+
+@media (max-width: 860px) {
+    .login-usuarios, .login-fila { grid-template-columns: 1fr; }
+}

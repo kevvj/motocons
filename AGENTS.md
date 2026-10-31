@@ -16,7 +16,7 @@ Lee esto antes de escribir código en este repositorio. Las reglas completas par
 
 ## Cómo se arma un módulo
 Copia `modulos/_plantilla/` como `modulos/<modulo>/` (minúsculas y `_`).
-- `modulo.php`: nombre, descripción y ruta. Con esto sale la tarjeta en el inicio.
+- `modulo.php`: nombre, descripción y ruta. Con esto sale la tarjeta en el inicio. Pon `'roles'` con los mismos roles de `requiereLogin()`: la tarjeta solo les sale a ellos.
 - `controladores/<Modulo>Controlador.php`: clase `<Modulo>Controlador extends Controlador`; cada método público es una acción (`?r=<modulo>/<metodo>`). Para `ventas_tienda` la clase es `VentasTiendaControlador`.
 - `modelos/<Modulo><Algo>Modelo.php`: clase `extends Modelo`, siempre con el prefijo del módulo para no chocar con otros grupos.
 - `vistas/<nombre>.php`: HTML con PHP. Se muestra dentro del layout común con `$this->vista('nombre', ['dato' => $valor])`.
