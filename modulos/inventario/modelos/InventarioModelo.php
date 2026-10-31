@@ -102,7 +102,6 @@ public function obtenerInventarioCompleto($filtros = [])
             return false; 
         }
 
-        // moto.propulsion es ENUM('combustion','electrica'); el controlador envía 'gasolina'
         $propulsion = ($datos['propulsion'] === 'electrica') ? 'electrica' : 'combustion';
 
         $sql = "INSERT INTO moto
@@ -130,10 +129,11 @@ public function obtenerInventarioCompleto($filtros = [])
      */
     public function obtenerCatalogoBaseCompleto()
     {
-        $sql = "SELECT pm.*, m.nombre as nombre_marca 
-                FROM producto_moto pm 
-                LEFT JOIN marca m ON pm.marca_id = m.marca_id 
+        $sql = "SELECT pm.*, ma.nombre AS nombre_marca
+                FROM producto_moto pm
+                LEFT JOIN marca ma ON pm.marca_id = ma.marca_id
                 ORDER BY pm.modelo ASC";
+
         return $this->db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -178,9 +178,22 @@ public function obtenerInventarioCompleto($filtros = [])
      */
     public function registrarNuevaMarca($nombre)
     {
+        $nombre = mb_strtoupper(trim($nombre), 'UTF-8');
+
+        $verificar = $this->db->prepare(
+            "SELECT COUNT(*) FROM marca WHERE nombre = :nombre"
+        );
+
+        $verificar->execute([':nombre' => $nombre]);
+
+        if ($verificar->fetchColumn() > 0) {
+            return false;
+        }
+
         $sql = "INSERT INTO marca (nombre) VALUES (:nombre)";
         $stmt = $this->db->prepare($sql);
-        return $stmt->execute([':nombre' => strtoupper($nombre)]);
+
+        return $stmt->execute([':nombre' => $nombre]);
     }
 
 }
