@@ -9,6 +9,10 @@ class CreditosRecursoModelo extends Modelo
 {
     // Ventas que todavía no tienen solicitud de crédito, para el desplegable de radicación.
     // Al filtrar por cliente se puede radicar sin buscar la factura a mano.
+    // Solo PENDIENTE o EN_CREDITO: una venta ya resuelta (PAGADA/ENTREGADA/CERRADA) o
+    // ANULADA no se financia. Columna agregada por ventas_presenciales (ver ADR-014).
+    private const ESTADOS_VENTA_FINANCIABLE = ['PENDIENTE', 'EN_CREDITO'];
+
     public function ventasSinSolicitud(?int $clienteId = null): array
     {
         $sql = "SELECT v.id, v.numero_factura, v.fecha, v.canal, v.total,
@@ -20,7 +24,8 @@ class CreditosRecursoModelo extends Modelo
                 LEFT JOIN vehiculo ve ON ve.venta_id = v.id
                 LEFT JOIN moto m ON m.id = ve.moto_id
                 LEFT JOIN solicitud_credito s ON s.venta_id = v.id
-                WHERE s.id IS NULL";
+                WHERE s.id IS NULL
+                  AND v.estado IN ('" . implode("','", self::ESTADOS_VENTA_FINANCIABLE) . "')";
         $parametros = [];
 
         if ($clienteId !== null) {
@@ -34,7 +39,7 @@ class CreditosRecursoModelo extends Modelo
     public function buscarVenta(int $ventaId): ?array
     {
         $filas = $this->consultar(
-            'SELECT v.id, v.numero_factura, v.fecha, v.canal, v.total,
+            'SELECT v.id, v.numero_factura, v.fecha, v.canal, v.total, v.estado,
                     v.cliente_id, c.nombre AS cliente, c.documento, c.telefono, c.correo
              FROM venta v
              JOIN cliente c ON c.id = v.cliente_id
@@ -44,6 +49,12 @@ class CreditosRecursoModelo extends Modelo
         );
 
         return $filas[0] ?? null;
+    }
+
+    // True si la venta todavía puede recibir una solicitud de crédito.
+    public static function esFinanciable(string $estadoVenta): bool
+    {
+        return in_array(strtoupper(trim($estadoVenta)), self::ESTADOS_VENTA_FINANCIABLE, true);
     }
 
     // Clientes con su número de facturas, para el buscador del formulario.
