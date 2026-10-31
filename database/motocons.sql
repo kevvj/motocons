@@ -297,3 +297,190 @@ INSERT INTO promocion_aplica (promocion_id, criterio, valor) VALUES
 (7, 'marca', 'Yamaha');
 -- Promociones 5 (Black Friday) y 6 (Liquidación) sin filas: aplican a todas.
 
+
+
+-- =====================  MÓDULO: inventario  =====================
+-- Grupo: Raul Correa, Luis Castro, Dana hernandez, Danna Banda, Mateo Martinez, Angel romero · Fecha: 2026-10-30
+-- Usa tablas de otros módulos: moto (garantia), vehiculo (garantia)
+-- Crea tablas nuevas: categoria, marca, proveedor, unidad_moto
+-- Modifica tabla: moto (agrega marca_id, proveedor_id, categoria_id, anio, cilindraje)
+--                 — avisar a garantía y promociones.
+
+-- 1) Tablas de apoyo del inventario
+CREATE TABLE categoria (
+    categoria_id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(80) NOT NULL UNIQUE,
+    porcentaje_comision DECIMAL(5, 2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB;
+
+CREATE TABLE marca (
+    marca_id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(80) NOT NULL UNIQUE,
+    activo TINYINT(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB;
+
+CREATE TABLE proveedor (
+    proveedor_id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(120) NOT NULL,
+    nit VARCHAR(20) NOT NULL,
+    telefono VARCHAR(20) NULL,
+    correo VARCHAR(254) NULL,
+    activo TINYINT(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB;
+
+INSERT INTO categoria (categoria_id, nombre, porcentaje_comision) VALUES
+    (1, 'baja', 2.00),
+    (2, 'media', 3.50),
+    (3, 'alta', 5.00),
+    (4, 'electrica', 3.00);
+
+INSERT INTO marca (marca_id, nombre, activo) VALUES
+    (1, 'YAMAHA', 1),
+    (2, 'HONDA', 1),
+    (3, 'SUZUKI', 1),
+    (4, 'BAJAJ', 1),
+    (5, 'AKT', 1),
+    (6, 'STARKER', 1),
+    (7, 'SUPER SOCO', 1);
+
+INSERT INTO proveedor (proveedor_id, nombre, nit, telefono, correo, activo) VALUES
+    (1, 'DISTRIBUIDORA MOTOS DEL CARIBE S.A.S.', '900123456-1', '+57 000 000 0001', 'contacto.caribe@example.com', 1),
+    (2, 'IMPORTADORA ANDINA DE MOTOCICLETAS', '900654321-7', '+57 000 000 0002', 'contacto.andina@example.com', 1),
+    (3, 'INCOLMOTOS', '900000003-0', '+57 000 000 0003', 'contacto.incolmotos@example.com', 1),
+    (4, 'SUZUKI MOTOR', '900000004-0', '+57 000 000 0004', 'contacto.suzuki@example.com', 1),
+    (5, 'FANALCA', '900000005-0', '+57 000 000 0005', 'contacto.fanalca@example.com', 1),
+    (6, 'AKT', '900000006-0', '+57 000 000 0006', 'contacto.akt@example.com', 1),
+    (7, 'GRUPO UMA S.A.S.', '900000007-0', '+57 000 000 0007', 'contacto.grupouma@example.com', 1),
+    (8, 'AUTECO MOBILITY S.A.S.', '901242456-1', '6043734000', 'notificacionesauteco@autecomobility.com', 1),
+    (9, 'DISMERCA S.A.S.', '890926713-1', '3185324546', 'contacto@niucolombia.com', 1);
+
+-- 2) La tabla moto (catálogo común) recibe las columnas del inventario.
+--    Son NULL para no romper las 3 motos que ya existen.
+--    moto.marca (texto) se conserva porque promociones filtra por ese texto.
+ALTER TABLE moto
+    ADD COLUMN marca_id INT NULL,
+    ADD COLUMN proveedor_id INT NULL,
+    ADD COLUMN categoria_id INT NULL,
+    ADD COLUMN anio SMALLINT UNSIGNED NULL,
+    ADD COLUMN cilindraje SMALLINT UNSIGNED NULL,
+    ADD CONSTRAINT fk_moto_marca FOREIGN KEY (marca_id) REFERENCES marca (marca_id),
+    ADD CONSTRAINT fk_moto_proveedor FOREIGN KEY (proveedor_id) REFERENCES proveedor (proveedor_id),
+    ADD CONSTRAINT fk_moto_categoria FOREIGN KEY (categoria_id) REFERENCES categoria (categoria_id);
+
+-- Enlazar con marca las motos que ya existían (Yamaha, Super Soco, Honda).
+UPDATE moto SET marca_id = (SELECT m.marca_id FROM marca m WHERE m.nombre = moto.marca);
+
+-- 3) Motos del inventario (antes producto_moto) como filas nuevas de moto.
+--    Los ids 1-3 ya los usan vehiculo, detalle_venta y promocion_aplica,
+--    por eso estas motos reciben ids nuevos (4 en adelante) y las unidades
+--    las buscan por marca/modelo.
+INSERT INTO moto (marca_id, proveedor_id, categoria_id, marca, modelo, propulsion, gama, precio, anio, cilindraje) VALUES
+    (1, 3, 1, 'Yamaha',     'FZ 150',       'combustion', 'baja',  10500000.00, 2026, 149),
+    (2, 5, 2, 'Honda',      'CB 190R',      'combustion', 'media', 13900000.00, 2026, 184),
+    (3, 4, 2, 'Suzuki',     'GIXXER 150',   'combustion', 'media',  9800000.00, 2026, 154),
+    (4, 7, 2, 'Bajaj',      'PULSAR NS200', 'combustion', 'media', 11700000.00, 2026, 199),
+    (5, 6, 1, 'AKT',        'CR4 125',      'combustion', 'baja',   6200000.00, 2026, 125),
+    (1, 3, 2, 'Yamaha',     'NMAX 155',     'combustion', 'media', 16500000.00, 2026, 155),
+    (3, 4, 2, 'Suzuki',     'Gixxer FI',    'combustion', 'media', 11500000.00, 2026, 155),
+    (6, 8, 1, 'Starker',    'Avanti Pro',   'electrica',  'baja',   6990000.00, 2026, 0),
+    (7, 9, 1, 'Super Soco', 'TC MAX',       'electrica',  'baja',  12999135.00, 2026, 0);
+
+-- 4) Unidades físicas en bodega. Al venderse, ventas crea el vehiculo
+--    y se guarda aquí su vehiculo_id con estado 'vendida'.
+CREATE TABLE unidad_moto (
+    unidad_moto_id INT AUTO_INCREMENT PRIMARY KEY,
+    moto_id INT NOT NULL,
+    chasis VARCHAR(30) NOT NULL UNIQUE,
+    motor VARCHAR(30) NOT NULL,
+    placa VARCHAR(10) NULL,
+    color VARCHAR(40) NOT NULL,
+    estado ENUM('disponible', 'reservada', 'vendida') NOT NULL DEFAULT 'disponible',
+    vehiculo_id INT NULL UNIQUE,              -- se llena cuando la unidad se vende
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (moto_id) REFERENCES moto (id),
+    FOREIGN KEY (vehiculo_id) REFERENCES vehiculo (id)
+) ENGINE=InnoDB;
+
+INSERT INTO unidad_moto (moto_id, chasis, motor, placa, color, estado) VALUES
+    ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0001',     'mt-fz150-0001',  NULL, 'AZUL',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0002',     'mt-fz150-0002',  NULL, 'NEGRO',  'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0003',     'mt-fz150-0003',  NULL, 'GRIS',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0004',     'mt-fz150-0004',  NULL, 'ROJO',   'reservada'),
+    ((SELECT id FROM moto WHERE modelo = 'CB 190R'),      'ch-cb190r-0001',    'mt-cb190r-0001', NULL, 'ROJO',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'CB 190R'),      'ch-cb190r-0002',    'mt-cb190r-0002', NULL, 'NEGRO',  'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'GIXXER 150'),   'ch-gix150-0001',    'mt-gix150-0001', NULL, 'AZUL',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'GIXXER 150'),   'ch-gix150-0002',    'mt-gix150-0002', NULL, 'BLANCO', 'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'CR4 125'),      'ch-cr4125-0001',    'mt-cr4125-0001', NULL, 'NEGRO',  'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'CR4 125'),      'ch-cr4125-0002',    'mt-cr4125-0002', NULL, 'ROJO',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'CR4 125'),      'ch-cr4125-0003',    'mt-cr4125-0003', NULL, 'AZUL',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'Gixxer FI'),    '9sb123x4567890123', 'f4g1-123456',    NULL, 'AZUL',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'Avanti Pro'),   '9sbel123x45678901', 'em1000w2600123', NULL, 'NEGRO',  'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'Avanti Pro'),   '9sbel123x45678902', 'em1000w2600124', NULL, 'AZUL',   'disponible'),
+    ((SELECT id FROM moto WHERE modelo = 'TC MAX'),       '9sbtcmax0h0012345', '16zw7245312ya',  NULL, 'NEGRO',  'disponible');
+
+-- Vista con los nombres del código viejo (producto_moto) para consultas SELECT.
+-- Solo lectura: para insertar o editar motos usa la tabla moto.
+-- Muestra solo las motos del inventario (las que tienen proveedor).
+CREATE VIEW producto_moto AS
+SELECT id AS moto_id,
+       marca_id,
+       proveedor_id AS proveedor,
+       categoria_id,
+       modelo,
+       precio,
+       anio,
+       cilindraje,
+       CASE propulsion WHEN 'combustion' THEN 'gasolina' ELSE propulsion END AS propulsion,
+       gama AS gama_cilindraje
+FROM moto
+WHERE proveedor_id IS NOT NULL;
+
+-- 5) Triggers de normalización de texto (los mismos de inventariodb.sql).
+--    Si tu cliente no soporta DELIMITER, bórralos: los datos de arriba ya vienen normalizados.
+DELIMITER $$
+CREATE TRIGGER bi_categoria_normalizar_texto BEFORE INSERT ON categoria FOR EACH ROW BEGIN
+    SET NEW.nombre = LOWER(NEW.nombre);
+END
+$$
+CREATE TRIGGER bu_categoria_normalizar_texto BEFORE UPDATE ON categoria FOR EACH ROW BEGIN
+    SET NEW.nombre = LOWER(NEW.nombre);
+END
+$$
+CREATE TRIGGER bi_marca_normalizar_texto BEFORE INSERT ON marca FOR EACH ROW BEGIN
+    SET NEW.nombre = UPPER(NEW.nombre);
+END
+$$
+CREATE TRIGGER bu_marca_normalizar_texto BEFORE UPDATE ON marca FOR EACH ROW BEGIN
+    SET NEW.nombre = UPPER(NEW.nombre);
+END
+$$
+CREATE TRIGGER bi_proveedor_normalizar_textos BEFORE INSERT ON proveedor FOR EACH ROW BEGIN
+    SET NEW.nombre = UPPER(NEW.nombre);
+    SET NEW.nit = LOWER(NEW.nit);
+    SET NEW.telefono = LOWER(NEW.telefono);
+    SET NEW.correo = LOWER(NEW.correo);
+END
+$$
+CREATE TRIGGER bu_proveedor_normalizar_textos BEFORE UPDATE ON proveedor FOR EACH ROW BEGIN
+    SET NEW.nombre = UPPER(NEW.nombre);
+    SET NEW.nit = LOWER(NEW.nit);
+    SET NEW.telefono = LOWER(NEW.telefono);
+    SET NEW.correo = LOWER(NEW.correo);
+END
+$$
+CREATE TRIGGER bi_unidad_moto_normalizar_textos BEFORE INSERT ON unidad_moto FOR EACH ROW BEGIN
+    SET NEW.chasis = LOWER(NEW.chasis);
+    SET NEW.motor = LOWER(NEW.motor);
+    SET NEW.placa = LOWER(NEW.placa);
+    SET NEW.color = UPPER(NEW.color);
+END
+$$
+CREATE TRIGGER bu_unidad_moto_normalizar_textos BEFORE UPDATE ON unidad_moto FOR EACH ROW BEGIN
+    SET NEW.chasis = LOWER(NEW.chasis);
+    SET NEW.motor = LOWER(NEW.motor);
+    SET NEW.placa = LOWER(NEW.placa);
+    SET NEW.color = UPPER(NEW.color);
+END
+$$
+DELIMITER ;
