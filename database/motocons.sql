@@ -538,3 +538,7 @@ INSERT INTO requisito_credito (medio_pago, descripcion, obligatorio) VALUES
     ('SERVICREDITO', 'Cédula de ciudadanía original del solicitante', 1),
     ('SERVICREDITO', 'Desprendibles de nómina de los dos últimos meses', 1),
     ('SERVICREDITO', 'Certificado laboral vigente con antigüedad mínima de 6 meses', 0);
+
+-- Usuario de prueba con rol analista (dictamina los créditos). Clave: analista123
+INSERT INTO usuario (nombre, correo, clave, rol) VALUES
+    ('Analista de crédito', 'analista@motocons.com', '$2y$10$boDCIDzYRm08PFf4HEf2FO.p9KtlzZ04AZZsV9QIG2OwL4Gvu5VE6', 'analista');
