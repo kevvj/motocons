@@ -10,7 +10,11 @@ class PromocionesControlador extends Controlador
     // index.php?r=promociones/index&estado=VIGENTE&q=honda
     public function index(): void
     {
-        $this->requiereLogin(self::ROLES_ADMIN);
+        // La tarjeta del inicio llega aquí: los clientes van al catálogo.
+        $this->requiereLogin();
+        if (!$this->puedeAdmin()) {
+            $this->redirigir('promociones/catalogo');
+        }
 
         $modelo = $this->modelo('PromocionesPromocionModelo');
         $estado = strtoupper(trim((string) ($_GET['estado'] ?? '')));
