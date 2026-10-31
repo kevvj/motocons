@@ -5,4 +5,5 @@ return [
     'descripcion' => 'Busca una moto por placa, chasis o factura y mira si su garantía sigue vigente.',
     'ruta' => 'garantia/index',
     'orden' => 30,
+    'cliente' => ['nombre' => 'Mis motos y garantía', 'descripcion' => 'Mira tus motos, hasta cuándo va su garantía y qué cubre.'],
 ];

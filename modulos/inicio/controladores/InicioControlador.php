@@ -1,13 +1,27 @@
 <?php
-// Página principal común. Muestra una tarjeta por cada módulo que tenga modulos/<modulo>/modulo.php
+// Página principal común.
+// - Sin sesión: portada pública de la tienda con algunas motos del catálogo.
+// - Con sesión: una tarjeta por cada modulos/<modulo>/modulo.php que el rol del usuario puede abrir.
 class InicioControlador extends Controlador
 {
     public function index(): void
     {
-        $this->vista('index', ['modulos' => $this->modulosDelMenu()]);
+        $usuario = $this->usuario();
+
+        if ($usuario === null) {
+            $this->vista('publico', ['motos' => $this->modelo('InicioCatalogoModelo')->destacadas()]);
+            return;
+        }
+
+        $this->vista('index', [
+            'usuario' => $usuario,
+            'esCliente' => $usuario['rol'] === 'cliente',
+            'modulos' => $this->modulosDelMenu($usuario['rol']),
+        ]);
     }
 
-    private function modulosDelMenu(): array
+    // Solo los módulos cuyo 'roles' incluye el rol del usuario (sin 'roles' = todos los que inician sesión).
+    private function modulosDelMenu(string $rol): array
     {
         $modulos = [];
         foreach (glob(RAIZ . '/modulos/*/modulo.php') as $archivo) {
@@ -19,9 +33,15 @@ class InicioControlador extends Controlador
             if (!is_array($datos) || empty($datos['nombre'])) {
                 continue;
             }
+            $roles = $datos['roles'] ?? [];
+            if ($roles && !in_array($rol, $roles, true)) {
+                continue;
+            }
+            // Texto pensado para el cliente, si el módulo lo trae.
+            $texto = ($rol === 'cliente' && isset($datos['cliente'])) ? $datos['cliente'] + $datos : $datos;
             $modulos[] = [
-                'nombre' => $datos['nombre'],
-                'descripcion' => $datos['descripcion'] ?? '',
+                'nombre' => $texto['nombre'],
+                'descripcion' => $texto['descripcion'] ?? '',
                 'ruta' => $datos['ruta'] ?? $carpeta . '/index',
                 'orden' => $datos['orden'] ?? 100,
             ];

@@ -25,6 +25,7 @@ revisar() {
 # Inicio y login sin sesión
 revisar "Inicio" "inicio/index"
 revisar "Login" "login/index"
+revisar "Registro" "login/registro"
 
 # Entrar con el usuario de prueba
 curl -s -c cookies.txt -o /dev/null "$URL/index.php?r=login/index"

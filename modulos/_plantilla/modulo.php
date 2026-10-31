@@ -6,4 +6,6 @@ return [
     'descripcion' => 'Una frase corta de lo que hace.',
     'ruta' => 'plantilla/index',   // la página que abre el botón "Entrar"
     'orden' => 100,                // posición en el inicio: menor sale primero
+    // Opcional: roles que ven la tarjeta. Sin 'roles' la ven todos los que inician sesión.
+    // 'roles' => ['admin', 'vendedor'],
 ];

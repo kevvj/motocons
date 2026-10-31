@@ -5,4 +5,5 @@ return [
     'descripcion' => 'Radica solicitudes de crédito, valida el checklist de Brilla y ServiCrédito, y aprueba o rechaza.',
     'ruta' => 'creditos/index',
     'orden' => 40,
+    'roles' => ['admin', 'vendedor', 'analista'],
 ];

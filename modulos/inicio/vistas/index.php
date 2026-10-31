@@ -1,21 +1,43 @@
-<h1>MOTOCONS</h1>
-<p class="inicio-subtitulo">Elige un módulo para entrar.</p>
+<?php
+$nombreCorto = explode(' ', trim($usuario['nombre']))[0];
+$roles = [
+    'admin' => 'Administrador',
+    'vendedor' => 'Vendedor',
+    'mecanico' => 'Mecánico',
+    'analista' => 'Analista de crédito',
+    'cliente' => 'Cliente',
+];
+?>
 
-<div class="alerta alerta-aviso">
-    Esta página de inicio es temporal: sirve para ver y probar los módulos de cada grupo mientras se integran.
-    No es el diseño final de la tienda; se cambiará cuando el proyecto esté más avanzado.
-</div>
+<section class="inicio-saludo">
+    <p class="inicio-etiqueta"><?= $esCliente ? 'Mi cuenta' : 'Panel de trabajo · ' . htmlspecialchars($roles[$usuario['rol']] ?? ucfirst($usuario['rol'])) ?></p>
+    <h1>Hola, <?= htmlspecialchars($nombreCorto) ?>.</h1>
+    <p class="inicio-lema">
+        <?= $esCliente
+            ? 'Aquí puedes ver tus motos, revisar su garantía y mirar las promociones vigentes.'
+            : '¿Qué vas a hacer hoy?' ?>
+    </p>
+</section>
 
 <?php if (!$modulos): ?>
-    <div class="alerta alerta-aviso">Todavía no hay módulos. Cada grupo agrega el suyo con un <code>modulo.php</code> en su carpeta.</div>
+    <div class="alerta alerta-aviso">Tu usuario todavía no tiene opciones asignadas. Habla con el administrador.</div>
 <?php else: ?>
     <div class="rejilla">
         <?php foreach ($modulos as $m): ?>
-            <div class="tarjeta inicio-modulo">
+            <a class="tarjeta inicio-modulo" href="index.php?r=<?= htmlspecialchars($m['ruta']) ?>">
                 <h2><?= htmlspecialchars($m['nombre']) ?></h2>
                 <p><?= htmlspecialchars($m['descripcion']) ?></p>
-                <a class="btn" href="index.php?r=<?= htmlspecialchars($m['ruta']) ?>">Entrar</a>
-            </div>
+                <span class="inicio-ir">Entrar →</span>
+            </a>
         <?php endforeach; ?>
     </div>
+<?php endif; ?>
+
+<?php if ($esCliente): ?>
+    <section class="inicio-cliente">
+        <div>
+            <h2>¿Tu moto necesita algo?</h2>
+            <p>Acércate a la tienda o al taller con tu placa o número de factura y te atendemos.</p>
+        </div>
+    </section>
 <?php endif; ?>

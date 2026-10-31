@@ -18,5 +18,6 @@
             </div>
             <button type="submit" class="btn btn-bloque">Entrar</button>
         </form>
+        <p class="login-pie">¿Eres cliente y no tienes cuenta? <a href="index.php?r=login/registro">Crea tu cuenta</a></p>
     </div>
 </div>

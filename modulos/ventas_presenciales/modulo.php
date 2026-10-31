@@ -5,4 +5,5 @@ return [
     'descripcion' => 'Registra la venta de motos en el almacén, confirma el pago y genera la factura.',
     'ruta' => 'ventas_presenciales/index',
     'orden' => 20,
+    'roles' => ['admin', 'vendedor'],
 ];

@@ -5,4 +5,5 @@ return [
     'descripcion' => 'Gestión y control de productos en stock',
     'ruta' => 'inventario/index',  
     'orden' => 60,                
+    'roles' => ['admin', 'vendedor'],
 ];
