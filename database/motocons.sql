@@ -457,6 +457,7 @@ CREATE TABLE unidad_moto (
     vehiculo_id INT NULL UNIQUE,              -- se llena cuando la unidad se vende
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+)
 
 INSERT INTO unidad_moto (moto_id, chasis, motor, placa, color, estado) VALUES
     ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0001',     'mt-fz150-0001',  NULL, 'AZUL',   'disponible'),
