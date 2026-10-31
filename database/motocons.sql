@@ -297,9 +297,6 @@ INSERT INTO promocion_aplica (promocion_id, criterio, valor) VALUES
 (7, 'marca', 'Yamaha');
 -- Promociones 5 (Black Friday) y 6 (Liquidación) sin filas: aplican a todas.
 
-
-
-
 -- =====================  MÓDULO: ventas_presenciales  =====================
 -- Grupo: <Miguel Martínez, Luis Galarcio, Juan Vargas, Santiago Hernandez > · Fecha: 2026-10-30
 -- Usa tablas de otros módulos: usuario (login), cliente, moto, venta, vehiculo, mantenimiento (garantia)
@@ -358,6 +355,7 @@ INSERT INTO detalle_venta (venta_id, moto_id, chasis, placa, precio) VALUES
     ((SELECT id FROM venta WHERE cliente_id = 2 AND estado = 'PENDIENTE'), 3, '9C2JC6810N0011223', NULL, 7800000),
     ((SELECT id FROM venta WHERE cliente_id = 3 AND estado = 'EN_CREDITO'), 2, 'LXYPCKL06R0007788', NULL, 14900000);
 
+    
 -- =====================  MÓDULO: inventario  =====================
 -- Grupo: Raul Correa, Luis Castro, Dana hernandez, Danna Banda, Mateo Martinez, Angel romero · Fecha: 2026-10-30
 -- Usa tablas de otros módulos: moto (garantia), vehiculo (garantia)
@@ -457,7 +455,9 @@ CREATE TABLE unidad_moto (
     vehiculo_id INT NULL UNIQUE,              -- se llena cuando la unidad se vende
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-)
+    FOREIGN KEY (moto_id) REFERENCES moto (id),
+    FOREIGN KEY (vehiculo_id) REFERENCES vehiculo (id)
+) ENGINE=InnoDB;
 
 INSERT INTO unidad_moto (moto_id, chasis, motor, placa, color, estado) VALUES
     ((SELECT id FROM moto WHERE modelo = 'FZ 150'),       'ch-fz150-0001',     'mt-fz150-0001',  NULL, 'AZUL',   'disponible'),
@@ -541,4 +541,3 @@ CREATE TRIGGER bu_unidad_moto_normalizar_textos BEFORE UPDATE ON unidad_moto FOR
 END
 $$
 DELIMITER ;
-
