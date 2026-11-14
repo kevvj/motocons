@@ -13,6 +13,7 @@ concurrency: desplegar
 jobs:
   desplegar:
     runs-on: ubuntu-latest
+    environment: produccion   # el secreto vive en este entorno; solo main puede usarlo
     if: github.ref == 'refs/heads/main'
 
     steps:
