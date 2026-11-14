@@ -1,6 +1,6 @@
 # Instrucciones para agentes de IA
 
-Lee esto antes de escribir código en este repositorio. Las reglas completas para personas están en `README.md`.
+Lee esto antes de escribir código en este repositorio. Las reglas completas para personas están en `CONTRIBUTING.md`.
 
 ## El proyecto
 - MOTOCONS: venta de motos. Proyecto conjunto: cada grupo hace un módulo.

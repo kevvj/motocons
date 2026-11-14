@@ -1,5 +1,5 @@
 <?php
-// Revisa que cada módulo siga las convenciones del README. Uso: php convenciones.php
+// Revisa que cada módulo siga las convenciones de CONTRIBUTING.md. Uso: php convenciones.php
 // Imprime una línea por error y sale con código 1 si hay alguno.
 $raiz = dirname(__DIR__, 2);
 $errores = [];
